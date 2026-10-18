@@ -25,6 +25,7 @@ export class IntroScene extends Phaser.Scene {
     this.controls = new Controls(this);
     this.fog = this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x601020).setAlpha(0.18);
     this.skip = false;
+    this.waitOk = null;
     makeText(this, W - textWidth('X: pular') - 6, H - 14, 'X: pular', COLORS.dim);
     Audio.play('title');
     this.run();
@@ -92,6 +93,7 @@ export class GameOverScene extends Phaser.Scene {
 
   async create() {
     this.controls = new Controls(this);
+    this.menu = null;
     this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x500010).setAlpha(0.3);
     centered(this, 70, STORY.gameover[0], 0xc82828, 2);
     centered(this, 104, STORY.gameover[1], 0xa898b0);
@@ -130,6 +132,8 @@ export class EndChapterScene extends Phaser.Scene {
 
   create() {
     this.controls = new Controls(this);
+    this.menu = null;
+    this.waitOk = null;
     this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x402030).setAlpha(0.2);
     Audio.play('ending', { restart: true });
     this.cameras.main.fadeIn(1500, 0, 0, 0);

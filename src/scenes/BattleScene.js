@@ -29,6 +29,7 @@ export class BattleScene extends Phaser.Scene {
     this.fleeAttempts = 0;
     this.ui = null;
     this.ended = false;
+    this.waitingOk = null;
     this.add.image(0, 0, this.opts.bg || 'bg_forest').setOrigin(0);
     this.add.rectangle(0, 160, W, 80, 0x000000).setOrigin(0);
     this.createCombatants();

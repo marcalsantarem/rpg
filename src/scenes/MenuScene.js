@@ -23,6 +23,9 @@ export class MenuScene extends Phaser.Scene {
   create() {
     this.controls = new Controls(this);
     this.stack = [];
+    this.partyObjs = null;
+    this.timeText = null;
+    this.goldText = null;
     this.buildMain();
   }
 

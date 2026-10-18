@@ -34,6 +34,13 @@ export class MapScene extends Phaser.Scene {
     this.busy = false;
     this.transitioning = false;
     this.entities = [];
+    // A instância da cena é reaproveitada a cada troca de mapa: limpa referências
+    // a objetos do mapa anterior (já destruídos), senão o loop quebra.
+    this.darkRT = null;
+    this.lightImg = null;
+    this.fog = null;
+    this.battleResolve = null;
+    this.overlayResult = undefined;
     this.api = this.makeApi();
 
     this.buildMap();
@@ -53,6 +60,7 @@ export class MapScene extends Phaser.Scene {
     this.events.once('shutdown', () => {
       this.events.off('wake', onWake);
       this.msg.destroy();
+      if (this.lightImg) this.lightImg.destroy();
     });
 
     if (DEBUG) this.setupDebug();

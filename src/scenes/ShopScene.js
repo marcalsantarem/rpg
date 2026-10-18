@@ -34,6 +34,7 @@ export class ShopScene extends Phaser.Scene {
     this.listWin = new Win(this, 96, 38, 224, 202);
     this.infoTexts = [];
     this.sub = null;
+    this.qty = null;
     this.cmd = new MenuList(this, this.cmdWin, {
       x: 22, y: 7, width: 70, rowH: 14,
       items: [{ label: 'Comprar' }, { label: 'Vender' }, { label: 'Sair' }],

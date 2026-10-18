@@ -19,6 +19,8 @@ export class SaveLoadScene extends Phaser.Scene {
   async create() {
     this.controls = new Controls(this);
     this.busy = true;
+    this.list = null;
+    this.confirm = null;
     const save = this.opts.mode === 'save';
     this.add.rectangle(0, 0, W, H, 0x000000, 0.6).setOrigin(0);
     const top = new Win(this, 0, 0, W, 26);

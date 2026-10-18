@@ -76,6 +76,9 @@ export class TitleScene extends Phaser.Scene {
 
   async create() {
     this.controls = new Controls(this);
+    this.leaving = false;
+    this.options = null;
+    this.menu = null;
     buildTitleArt(this);
     this.add.image(0, 0, 'title_bg').setOrigin(0);
     this.fog1 = this.add.tileSprite(0, 150, W, 90, 'fog').setOrigin(0).setTint(0x804050).setAlpha(0.35);
