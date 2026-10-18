@@ -1,0 +1,24 @@
+{
+  "name": "sinos-de-cinza",
+  "productName": "Sinos de Cinza",
+  "version": "0.1.0",
+  "description": "RPG de fantasia e terror por turnos, estilo clássico 16-bit.",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "debug": "electron . --debug",
+    "smoke": "electron . --smoke",
+    "check": "node tools/check-data.mjs",
+    "serve": "node tools/serve.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "electron": "^44.9.0"
+  }
+}
