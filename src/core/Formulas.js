@@ -17,11 +17,12 @@ export function critChance(a) {
   return 0.04 + a.luck / 300;
 }
 
+// Dano proporcional: ataque² / (ataque + defesa). Defesa igual ao ataque corta o dano pela metade,
+// sem zerar nem explodir nos extremos (bem mais estável nos níveis baixos).
 export function physDamage(a, t, power = 1, crit = false, element = null) {
-  const def = t.def * (t.buffs?.def ?? 1);
-  let base = crit ? a.atk * 1.25 : a.atk - def * 0.5;
-  base = Math.max(a.atk * 0.15, base);
-  let dmg = base * power * rand(0.88, 1.08) * elementMult(t, element);
+  const def = (crit ? 0.5 : 1) * t.def * (t.buffs?.def ?? 1);
+  const base = (a.atk * a.atk) / Math.max(1, a.atk + def);
+  let dmg = base * power * rand(0.9, 1.1) * elementMult(t, element);
   if (crit) dmg *= 1.5;
   if (t.defending) dmg *= 0.5;
   return Math.max(1, Math.round(dmg));

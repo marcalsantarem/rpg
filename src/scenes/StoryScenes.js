@@ -23,7 +23,7 @@ export class IntroScene extends Phaser.Scene {
 
   create() {
     this.controls = new Controls(this);
-    this.fog = this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x601020).setAlpha(0.18);
+    this.fog = this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x403070).setAlpha(0.18);
     this.skip = false;
     this.waitOk = null;
     makeText(this, W - textWidth('X: pular') - 6, H - 14, 'X: pular', COLORS.dim);
@@ -36,7 +36,7 @@ export class IntroScene extends Phaser.Scene {
     this.fog.tilePositionX += 0.2;
     this.fog.tilePositionY += 0.05;
     if (this.controls.pressed('cancel')) this.skip = true;
-    if (this.waitOk && this.controls.pressed('ok')) {
+    if (this.waitOk && (this.controls.pressed('ok') || this.skip)) {
       const r = this.waitOk;
       this.waitOk = null;
       r();
@@ -54,30 +54,35 @@ export class IntroScene extends Phaser.Scene {
       const y0 = Math.round(H / 2 - (lines.length * 13) / 2);
       const texts = lines.map((l, i) => centered(this, y0 + i * 13, l, 0xd8d0e0).setAlpha(0));
       this.tweens.add({ targets: texts, alpha: 1, duration: 900 });
-      await wait(this, 900);
+      if (!this.skip) await this.okOr(900);
       if (!this.skip) await this.okOr(5200);
       this.waitOk = null;
       this.tweens.add({ targets: texts, alpha: 0, duration: 700 });
       await wait(this, 750);
       texts.forEach((t) => t.destroy());
     }
-    // pesadelo
+    if (this.skip) {
+      Audio.stop(0.5);
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      await wait(this, 550);
+      const g0 = State.g;
+      this.scene.start('Map', { map: g0.map.id, x: g0.map.x, y: g0.map.y, dir: g0.map.dir, from: 'cabana' });
+      return;
+    }
+    // sonho
     Audio.stop(1.5);
     await wait(this, 600);
-    this.cameras.main.flash(300, 160, 0, 0);
-    Audio.sfx('heart');
-    for (const l of STORY.nightmare) {
-      const t = centered(this, 110, l, 0xc82828).setAlpha(0);
-      Audio.sfx('whisper');
+    this.cameras.main.flash(300, 255, 220, 140);
+    for (const l of STORY.dream) {
+      const t = centered(this, 110, l, 0xf0d070).setAlpha(0);
+      Audio.sfx('light');
       this.tweens.add({ targets: t, alpha: 1, duration: 500, yoyo: true, hold: 700 });
       await wait(this, 1800);
       t.destroy();
     }
     Audio.sfx('bell');
-    this.cameras.main.shake(700, 0.01);
     await wait(this, 300);
-    Audio.sfx('scream');
-    this.cameras.main.flash(500, 255, 255, 255);
+    this.cameras.main.flash(600, 255, 240, 200);
     await wait(this, 700);
     this.cameras.main.fadeOut(900, 0, 0, 0);
     await wait(this, 1000);
@@ -94,8 +99,8 @@ export class GameOverScene extends Phaser.Scene {
   async create() {
     this.controls = new Controls(this);
     this.menu = null;
-    this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x500010).setAlpha(0.3);
-    centered(this, 70, STORY.gameover[0], 0xc82828, 2);
+    this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x302050).setAlpha(0.3);
+    centered(this, 70, STORY.gameover[0], 0xe0b050, 2);
     centered(this, 104, STORY.gameover[1], 0xa898b0);
     Audio.play('gameover', { restart: true });
     this.cameras.main.fadeIn(1200, 0, 0, 0);
@@ -163,7 +168,7 @@ export class EndChapterScene extends Phaser.Scene {
       const big = i === 0;
       const wrapped = big ? [l] : wrapText(l, 280);
       for (const w of wrapped) {
-        const t = centered(this, y, w, big ? 0xc82828 : i === 1 ? 0xf8e078 : i === lines.length - 1 ? 0xb8a8c0 : 0xd8d0e0, big ? 2 : 1).setAlpha(0);
+        const t = centered(this, y, w, big ? 0xf0c050 : i === 1 ? 0xf8e078 : i === lines.length - 1 ? 0xb8a8c0 : 0xd8d0e0, big ? 2 : 1).setAlpha(0);
         objs.push(t);
         this.tweens.add({ targets: t, alpha: 1, duration: 900 });
         y += big ? 26 : 13;

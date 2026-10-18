@@ -1,39 +1,39 @@
-// Mata dos Enforcados: Mirela e o Pai-Galho.
+// Floresta Ancestral: Mirela e Raizmor.
 async function mirelaScene(a) {
   if (a.flag('mirela_joined')) return;
   a.set('mirela_met');
   await a.music(null);
   await a.face('mirela', 'down');
-  await a.say('???', 'Mais um passo e eu transformo vocês em adubo. Já tenho problemas suficientes.');
-  await a.say('Selene', 'Você é... a Bruxa da Mata. A vila diz que você calou o sino da capela.');
-  await a.say('Mirela', 'A vila diz muita coisa. Eu sou Mirela. E eu estava tentando FAZER o sino tocar de novo, sua noviça ingênua.');
+  await a.say('???', 'Parem aí! Mais um passo e vocês viram cogumelos. Esta floresta está sob minha proteção.');
+  await a.say('Selene', 'Você é... a bruxa da floresta?');
+  await a.say('Mirela', 'Maga, por favor. Mirela, guardiã da Floresta Ancestral. "Bruxa" é coisa que aldeão inventa quando não entende magia.');
   await a.sfx('heart');
   await a.shake(300, 0.006);
-  await a.say('Mirela', 'Ótimo. Vocês fizeram barulho e acordaram os Enforcados. Ou lutamos juntos, ou viramos frutas nas árvores.');
-  const won = await a.battle(['enforcado', 'enforcado'], { bg: 'bg_deadforest' });
+  await a.say('Mirela', 'Ótimo, vocês trouxeram companhia: cavaleiros sombrios! Lutem ao meu lado ou virem adubo.');
+  const won = await a.battle(['cavaleiro', 'cavaleiro'], { bg: 'bg_deadforest' });
   if (!won) return;
-  await a.say('Mirela', 'Hm. Vocês não são completamente inúteis.');
-  await a.say('Aren', 'A Tecelã guardava um fragmento dos Sinos de Ossos. Ela disse que deu o corpo de Lia ao Pai-Galho.');
-  await a.say('Mirela', 'Então você tem um fragmento... Por isso a névoa deixou vocês passarem. O Pai-Galho guarda o outro, no coração da mata.');
-  await a.say('Mirela', 'Eu vou junto. Não por vocês, nem pela vila que me queimaria viva. Por causa do que está vindo depois.');
+  await a.say('Mirela', 'Hm. Nada mal para um escudeiro. E essa marca na sua mão... a Marca do Sol! Então a profecia era verdade.');
+  await a.say('Aren', 'A Rainha Aranha disse que mandou a Lia para Raizmor. E nós temos um Cristal da Aurora.');
+  await a.say('Mirela', 'Raizmor é o espírito mais antigo desta floresta. Ele guarda outro fragmento dos sinos, mas a sombra de Morvath o corrompeu.');
+  await a.say('Mirela', 'Eu vou com vocês. Estudo os Sinos da Aurora há anos, e sozinha não consigo salvar Raizmor.');
   await a.remove('mirela');
   a.join('mirela');
   a.set('mirela_joined');
   await a.sfx('levelup');
   await a.say(null, 'Mirela entrou para o grupo!');
-  await a.say('Mirela', 'Os espinhos ao norte se alimentam de medo. O meu fogo se alimenta deles. Vamos.');
+  await a.say('Mirela', 'Os espinhos ao norte crescem com a sombra. Um pouco de fogo arcano resolve.');
   await a.music('deadforest');
 }
 
-const FOG = { color: 0xb02020, alpha: 0.22 };
+const FOG = { color: 0x8a60c8, alpha: 0.2 };
 
 export const mata1 = {
   id: 'mata1',
-  name: 'Mata dos Enforcados',
+  name: 'Floresta Ancestral',
   music: 'deadforest',
   base: 'darkgrass',
   banner: true,
-  dark: 0.6,
+  dark: 0.4,
   lightRadius: 72,
   fog: FOG,
   encounters: {
@@ -41,12 +41,12 @@ export const mata1 = {
     bg: 'bg_deadforest',
     groups: [
       { e: ['corvo', 'corvo'], w: 3 },
-      { e: ['enforcado'], w: 2 },
+      { e: ['cavaleiro'], w: 2 },
       { e: ['espantalho', 'corvo'], w: 2 },
       { e: ['raiz', 'raiz'], w: 2 },
       { e: ['olho', 'corvo'], w: 2 },
-      { e: ['lobo_nevoa', 'lobo_nevoa'], w: 2 },
-      { e: ['enforcado', 'raiz'], w: 1 },
+      { e: ['lobo_sombrio', 'lobo_sombrio'], w: 2 },
+      { e: ['cavaleiro', 'raiz'], w: 1 },
     ],
   },
   rows: [
@@ -86,15 +86,15 @@ export const mata1 = {
     { type: 'chest', id: 'c2', x: 25, y: 15, item: 'fita_vermelha', qty: 1 },
     { type: 'chest', id: 'c3', x: 25, y: 9, item: 'eter', qty: 2 },
     { type: 'chest', id: 'c4', x: 11, y: 19, gold: 250 },
-    { type: 'read', x: 10, y: 5, text: 'Um corpo balança no galho. Pendurada no pescoço, uma placa: "BRUXO". A letra é idêntica à da placa da vila.' },
-    { type: 'read', x: 10, y: 20, text: 'Outro enforcado. Este ainda segura um terço quebrado. Os lábios se movem: "...o sino... toque o sino..."' },
+    { type: 'read', x: 10, y: 5, text: 'Uma árvore anciã coberta de musgo luminoso. No tronco, runas élficas: "Quando a aurora calar, a floresta adormecerá."' },
+    { type: 'read', x: 10, y: 20, text: 'Vaga-lumes dançam ao redor desta árvore antiga. Por um instante, parecem formar o desenho de um sino.' },
     {
       type: 'auto', id: 'entrada',
       cond: (f) => !f.mata_enter,
       script: async (a) => {
         a.set('mata_enter');
-        await a.say('Kael', 'Já cacei em muitas florestas. Nenhuma me olhava de volta.');
-        await a.say('Selene', 'As árvores... estão sangrando seiva vermelha. Liora, guarde-nos.');
+        await a.say('Kael', 'Já cacei em muitas florestas, mas nenhuma brilhava assim. Esses cogumelos estão... acesos?');
+        await a.say('Selene', 'A floresta é linda, mas sinto a sombra pesando sobre ela. Como se estivesse doente.');
       },
     },
     { type: 'npc', id: 'mirela', x: 8, y: 12, sprite: 'mirela', dir: 'up', cond: (f) => !f.mirela_joined, script: mirelaScene },
@@ -103,10 +103,10 @@ export const mata1 = {
       type: 'obj', id: 'espinho1', x: 20, y: 2, texture: 'obj_bramble', solid: true,
       script: async (a) => {
         if (!a.partyHas('mirela')) {
-          await a.say(null, 'Uma muralha de espinhos negros pulsa como veias. Quando Aren se aproxima, ela cresce.');
+          await a.say(null, 'Uma muralha de espinhos púrpura bloqueia a trilha. Quando Aren se aproxima, os galhos se fecham ainda mais.');
           return;
         }
-        await a.say('Mirela', 'Queimem, queimem. Vocês sempre gostaram de medo; provem o calor.');
+        await a.say('Mirela', 'Chama Arcana! Espinhos sombrios não gostam de fogo azul.');
         await a.sfx('fire');
         await a.flash(0xff6020, 300);
         await a.remove('espinho1');
@@ -120,10 +120,10 @@ export const mata1 = {
 
 export const mata2 = {
   id: 'mata2',
-  name: 'Coração da Mata',
+  name: 'Coração da Floresta',
   music: 'deadforest',
   base: 'darkgrass',
-  dark: 0.62,
+  dark: 0.45,
   lightRadius: 72,
   fog: FOG,
   rows: [
@@ -164,26 +164,26 @@ export const mata2 = {
         await a.music(null);
         await a.sfx('heart');
         await a.wait(400);
-        await a.say('Mirela', 'Ali. Entre as raízes. Vejam.');
-        await a.say(null, 'Presa entre as raízes, uma menina dorme. A casca da árvore cresce devagar sobre os braços dela.');
-        await a.say('Pai-Galho', 'SHHHH... a pequenina está quase esquecendo. Quando ela esquecer o próprio nome, vai virar folha. Folha bonita, vermelha.');
-        await a.say('Pai-Galho', 'Eu guardo o sino de Liora há trezentos anos. Ninguém o toca. Ninguém o ouve. O Rei me prometeu que eu jamais seria cortado.');
-        await a.say('Aren', 'Eu sou coveiro. Sei cavar até a raiz de qualquer coisa.');
-        await a.say('Pai-Galho', 'Então venha, coveiro. Plante-se aqui!');
+        await a.say('Mirela', 'Ali, entre as raízes. É a menina!');
+        await a.say(null, 'Lia dorme envolta em raízes macias, cercada por flores que brilham num tom púrpura.');
+        await a.say('Raizmor', 'Shhh... a pequena sonha um sonho sem fim. Aqui, a sombra não a alcança. Aqui, nada muda nunca mais.');
+        await a.say('Mirela', 'Raizmor, sou eu, Mirela! A sombra de Morvath está falando por você. Acorde!');
+        await a.say('Raizmor', 'Guardei o cristal da rainha por trezentos anos... estou CANSADO. A escuridão prometeu descanso eterno. Para mim, e para todos.');
+        await a.say('Aren', 'Então vamos libertar você dessa sombra. Pela Lia!');
         const won = await a.battle(['pai_galho'], { boss: true, bg: 'bg_grove', music: 'boss' });
         if (!won) return;
         a.set('boss2');
         await a.remove('pai_galho');
         await a.sfx('bell');
         await a.flash(0xffffff, 500);
-        await a.say(null, 'O Pai-Galho tomba com um gemido longo. De seu tronco partido rola outro pedaço de osso vibrante.');
+        await a.say(null, 'A sombra escapa do tronco de Raizmor como fumaça. Suas folhas voltam a ficar verdes, e um cristal dourado rola até os pés de Aren.');
         a.give('fragmento2', 1, true);
         await a.sfx('item');
-        await a.say(null, 'Obteve o Fragmento do Sino II!');
+        await a.say(null, 'Obteve o Cristal da Aurora II!');
+        await a.say('Raizmor', '...Obrigado, pequenos. Eu me perdi na escuridão. Levem o cristal... e a criança. Ela está livre.');
         await a.spawn('lia_npc', 'lia', 12, 5, 'down');
-        await a.say('Selene', 'Lia! Ela está respirando... está quente!');
-        await a.say('Lia', '...Lia. Meu nome é Lia. Eu... eu ainda lembro.');
-        await a.say('Aren', 'Vamos para casa, Lia. Seu irmão está esperando.');
+        await a.say('Lia', '...Hã? Onde estou? Aren?! Você veio me buscar!');
+        await a.say('Aren', 'Claro que vim. Vamos para casa, Lia. O Tomé está esperando.');
         await a.fade('out', 1000);
         a.heal();
         await a.warp('casa_anciao', 5, 4, 'up');

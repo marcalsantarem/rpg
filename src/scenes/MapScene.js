@@ -8,7 +8,7 @@ import { Win } from '../ui/UI.js';
 import { textWidth } from '../core/Font.js';
 import { MAPS } from '../data/maps/index.js';
 import { LEGEND } from '../data/maps/legend.js';
-import { TILE_INDEX } from '../art/tiles.js';
+import { TILE_INDEX, VARIANTS, AUTOS, OBJ_VARIANTS, SCATTER, AUTO_FILL_VARIANTS, hash2 } from '../art/tiles.js';
 import { ITEMS } from '../data/items.js';
 
 const OPP = { up: 'down', down: 'up', left: 'right', right: 'left' };
@@ -81,22 +81,47 @@ export class MapScene extends Phaser.Scene {
     this.solid = [];
     this.counter = [];
     this.animTiles = [];
-    const idx = (name) => TILE_INDEX[name === '$' ? def.base : name];
+    const at = (x, y) => (x < 0 || y < 0 || x >= this.mapW || y >= this.mapH ? null : LEGEND[rows[y][x]] ?? LEGEND['.']);
+    const resolve = (name, x, y, L) => {
+      if (name === '$') name = def.base;
+      if (L && L.auto && L.g === name) {
+        const same = (xx, yy) => {
+          const n = at(xx, yy);
+          return n === null || n.ag === L.ag;
+        };
+        let m = (same(x, y - 1) ? 1 : 0) | (same(x + 1, y) ? 2 : 0) | (same(x, y + 1) ? 4 : 0) | (same(x - 1, y) ? 8 : 0);
+        if (AUTOS[name].bits === 'EW') m &= 10;
+        if (m === 15 && AUTO_FILL_VARIANTS[name]) {
+          const v = hash2(x, y) % (AUTO_FILL_VARIANTS[name] + 1);
+          if (v) return `${name}@15#${v}`;
+        }
+        return AUTOS[name].frames > 1 ? [0, 1].map((f) => `${name}@${m}@${f}`) : `${name}@${m}`;
+      }
+      if (VARIANTS[name]) return `${name}#${hash2(x, y) % VARIANTS[name]}`;
+      const ov = OBJ_VARIANTS[name];
+      if (ov) return ov[hash2(x, y) % ov.length];
+      return name;
+    };
+    const idx = (name) => TILE_INDEX[name] ?? 0;
     for (let y = 0; y < this.mapH; y++) {
       this.solid.push([]);
       this.counter.push([]);
       for (let x = 0; x < this.mapW; x++) {
-        const ch = rows[y][x];
-        const L = LEGEND[ch] ?? LEGEND['.'];
-        let gname = L.g;
-        if (L.cave) {
-          const below = rows[y + 1]?.[x];
-          if (below !== undefined && !LEGEND[below]?.cave) gname = 'caveface';
+        const L = at(x, y);
+        const g = resolve(L.g, x, y, L);
+        if (Array.isArray(g)) {
+          this.ground.putTileAt(idx(g[0]), x, y);
+          this.animTiles.push({ x, y, frames: g.map(idx) });
+        } else this.ground.putTileAt(idx(g), x, y);
+        if (L.d) this.deco.putTileAt(idx(resolve(L.d, x, y)), x, y);
+        else if (L.scatter && SCATTER[L.scatter] && hash2(x * 7 + 3, y * 13 + 1) % 100 < 16) {
+          const opts = SCATTER[L.scatter];
+          this.deco.putTileAt(idx(opts[hash2(x + 11, y + 5) % opts.length]), x, y);
         }
-        this.ground.putTileAt(idx(gname), x, y);
-        if (L.d) this.deco.putTileAt(idx(L.d), x, y);
-        if (L.top && y > 0) this.over.putTileAt(idx(L.top), x, y - 1);
-        if (L.anim) this.animTiles.push({ x, y, frames: L.anim.map(idx) });
+        if (L.top && y > 0) {
+          const top = OBJ_VARIANTS[L.top] ? OBJ_VARIANTS[L.top][hash2(x, y) % OBJ_VARIANTS[L.top].length] : L.top;
+          this.over.putTileAt(idx(top), x, y - 1);
+        }
         this.solid[y].push(!!L.solid);
         this.counter[y].push(!!L.counter);
       }

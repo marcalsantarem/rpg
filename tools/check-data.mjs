@@ -7,9 +7,9 @@ import { HEROES } from '../src/data/heroes.js';
 import { ENEMIES } from '../src/data/enemies.js';
 import { SHOPS } from '../src/data/shops.js';
 import { SONGS } from '../src/data/music.js';
-import { CHARACTERS } from '../src/art/characters.js';
+import { CHARACTERS, validateCharacters } from '../src/art/characters.js';
 import { MONSTER_ART } from '../src/art/monsters.js';
-import { TILE_INDEX } from '../src/art/tiles.js';
+import { tileExists } from '../src/art/tiles.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,7 +18,7 @@ const errors = [];
 const warn = [];
 const err = (m) => errors.push(m);
 
-const SPRITES = new Set([...Object.keys(CHARACTERS), 'cat']);
+const SPRITES = new Set([...Object.keys(CHARACTERS), 'cat', 'fairy']);
 
 function solidAt(map, x, y) {
   const row = map.rows[y];
@@ -39,7 +39,7 @@ for (const [id, map] of Object.entries(MAPS)) {
     if (!L) continue;
     for (const k of ['g', 'd', 'top']) {
       const t = L[k] === '$' ? map.base : L[k];
-      if (t && TILE_INDEX[t] === undefined) err(`${id}: tile "${t}" (de "${ch}") não existe`);
+      if (t && !tileExists(t)) err(`${id}: tile "${t}" (de "${ch}") não existe`);
     }
   }
   if (!SONGS[map.music]) err(`${id}: música "${map.music}" não existe`);
@@ -95,6 +95,7 @@ for (const [id, e] of Object.entries(ENEMIES)) {
 }
 for (const [id, s] of Object.entries(SHOPS)) for (const it of s.stock) if (!ITEMS[it]) err(`loja ${id}: item "${it}" não existe`);
 
+for (const e of validateCharacters()) err(`sprite: ${e}`);
 for (const w of warn) console.warn('aviso:', w);
 if (errors.length) {
   for (const e of errors) console.error('ERRO:', e);

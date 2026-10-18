@@ -14,14 +14,17 @@ function buildTitleArt(scene) {
   if (scene.textures.exists('title_bg')) return;
   const { canvas, ctx } = makeCanvas(W, H);
   const r = rng(13);
-  for (let y = 0; y < H; y++) rect(ctx, 0, y, W, 1, mix('#04020a', '#3a0c16', Math.floor((y / 190) * 10) / 10));
-  for (let i = 0; i < 90; i++) px(ctx, Math.floor(r() * W), Math.floor(r() * 130), r() < 0.3 ? '#a8a0b8' : '#5a5068');
-  // lua vermelha
-  disc(ctx, 258, 112, 40, '#3a0c12');
-  disc(ctx, 258, 112, 36, '#5a1418');
-  disc(ctx, 258, 112, 32, '#b02a28');
-  disc(ctx, 252, 106, 26, '#c8403a');
-  for (const [x, y, rr] of [[270, 118, 5], [246, 124, 3], [262, 98, 3], [244, 104, 2]]) disc(ctx, x, y, rr, '#962220');
+  for (let y = 0; y < H; y++) rect(ctx, 0, y, W, 1, mix('#0a0c24', '#4a3a6a', Math.floor((y / 200) * 10) / 10));
+  for (let i = 0; i < 110; i++) px(ctx, Math.floor(r() * W), Math.floor(r() * 140), r() < 0.3 ? '#f0f0ff' : '#8a88b8');
+  // lua prateada
+  disc(ctx, 272, 112, 26, '#3a3a6a');
+  disc(ctx, 272, 112, 22, '#c8c8e0');
+  disc(ctx, 268, 108, 18, '#e8e8f8');
+  for (const [x, y, rr] of [[280, 116, 3], [264, 120, 2], [276, 102, 2]]) disc(ctx, x, y, rr, '#b8b8d4');
+  // montanhas
+  poly(ctx, [[0, 170], [40, 120], [80, 150], [130, 100], [190, 160], [240, 118], [290, 150], [320, 128], [320, 240], [0, 240]], '#2a2448');
+  poly(ctx, [[130, 100], [118, 114], [138, 112]], '#d8d8f0');
+  poly(ctx, [[240, 118], [230, 128], [248, 127]], '#d8d8f0');
   // colinas
   const hill = (base, amp, color, f) => {
     for (let x = 0; x < W; x++) {
@@ -29,43 +32,41 @@ function buildTitleArt(scene) {
       rect(ctx, x, h, 1, H - h, color);
     }
   };
-  hill(170, 10, '#1a0a12', 0.02);
-  // capela com torre do sino
-  const C = '#0a0508';
-  rect(ctx, 40, 120, 60, 70, C);
-  poly(ctx, [[34, 122], [70, 92], [106, 122]], C);
-  rect(ctx, 56, 52, 22, 70, C);
-  poly(ctx, [[52, 54], [67, 24], [82, 54]], C);
-  rect(ctx, 66, 14, 2, 12, C);
-  rect(ctx, 62, 18, 10, 2, C);
-  rect(ctx, 61, 62, 12, 14, '#2a0a10');
-  poly(ctx, [[63, 66], [67, 63], [71, 66], [72, 74], [62, 74]], '#0a0508');
-  rect(ctx, 66, 74, 2, 2, '#0a0508');
-  rect(ctx, 80, 140, 6, 10, '#e0a040');
-  rect(ctx, 50, 140, 6, 10, '#7a3a20');
-  hill(196, 6, '#0c060a', 0.035);
-  // árvores mortas
-  for (const [x, h] of [[150, 70], [290, 90], [310, 60], [180, 46]]) {
-    thick(ctx, x, 200, x + 2, 200 - h, 2, C);
-    for (let b = 0; b < 4; b++) {
-      const by = 200 - h * (0.45 + b * 0.14);
-      const dir = b % 2 ? 1 : -1;
-      thick(ctx, x + 1, by, x + dir * (10 + r() * 14), by - 8 - r() * 10, 1, C);
-    }
+  hill(176, 8, '#1c1834', 0.02);
+  // castelo com torre do sino
+  const C = '#120e22';
+  rect(ctx, 30, 120, 80, 70, C);
+  for (let x = 30; x < 110; x += 8) rect(ctx, x, 116, 5, 4, C);
+  rect(ctx, 22, 96, 18, 94, C);
+  rect(ctx, 100, 100, 18, 90, C);
+  poly(ctx, [[19, 98], [31, 76], [43, 98]], C);
+  poly(ctx, [[97, 102], [109, 82], [121, 102]], C);
+  rect(ctx, 58, 64, 24, 60, C);
+  poly(ctx, [[54, 66], [70, 30], [86, 66]], C);
+  rect(ctx, 69, 22, 2, 10, C);
+  // sino de cristal brilhando na torre
+  rect(ctx, 63, 74, 14, 16, '#2a2050');
+  disc(ctx, 70, 82, 7, 'rgba(255,230,150,0.25)');
+  poly(ctx, [[66, 86], [68, 77], [72, 77], [74, 86]], '#f8e8a0');
+  poly(ctx, [[68, 86], [69, 78], [70, 78], [70, 86]], '#fffbe0');
+  // janelas acesas
+  for (const [x, y] of [[29, 110], [107, 114], [44, 140], [56, 140], [84, 140], [96, 140], [29, 140], [107, 150]]) {
+    rect(ctx, x, y, 3, 5, '#f0c060');
+    px(ctx, x, y, '#f8e8a8');
   }
-  // lápides e cruzes
-  for (let i = 0; i < 9; i++) {
-    const x = 110 + i * 22 + Math.floor(r() * 8);
-    const y = 206 + Math.floor(r() * 10);
-    if (i % 3 === 0) {
-      rect(ctx, x + 3, y - 14, 2, 14, C);
-      rect(ctx, x, y - 10, 8, 2, C);
-    } else {
-      rect(ctx, x, y - 10, 8, 10, C);
-      disc(ctx, x + 4, y - 10, 4, C);
-    }
+  hill(200, 5, '#14102a', 0.035);
+  // árvores
+  for (const [x, h] of [[150, 40], [170, 52], [195, 38], [290, 50], [312, 36]]) {
+    poly(ctx, [[x, 204 - h], [x - 9, 206], [x + 9, 206]], '#0e1426');
+    poly(ctx, [[x, 204 - h - 10], [x - 6, 206 - h * 0.4], [x + 6, 206 - h * 0.4]], '#0e1426');
   }
-  rect(ctx, 0, 218, W, 22, '#050306');
+  // casinhas da vila com janelas
+  for (const x of [210, 236, 262]) {
+    rect(ctx, x, 196, 18, 14, '#120e22');
+    poly(ctx, [[x - 2, 197], [x + 9, 188], [x + 20, 197]], '#120e22');
+    rect(ctx, x + 7, 201, 4, 4, '#f0c060');
+  }
+  rect(ctx, 0, 218, W, 22, '#0a0818');
   addTexture(scene, 'title_bg', canvas);
 }
 
@@ -81,13 +82,13 @@ export class TitleScene extends Phaser.Scene {
     this.menu = null;
     buildTitleArt(this);
     this.add.image(0, 0, 'title_bg').setOrigin(0);
-    this.fog1 = this.add.tileSprite(0, 150, W, 90, 'fog').setOrigin(0).setTint(0x804050).setAlpha(0.35);
-    this.fog2 = this.add.tileSprite(0, 170, W, 70, 'fog').setOrigin(0).setTint(0xa08090).setAlpha(0.25);
+    this.fog1 = this.add.tileSprite(0, 150, W, 90, 'fog').setOrigin(0).setTint(0x8070c0).setAlpha(0.3);
+    this.fog2 = this.add.tileSprite(0, 170, W, 70, 'fog').setOrigin(0).setTint(0xb0a8e0).setAlpha(0.22);
 
     // morcegos
     this.bats = [];
     for (let i = 0; i < 4; i++) {
-      const b = this.add.image(-40, 40 + i * 18, 'mon_bat').setScale(0.35).setTint(0x000000);
+      const b = this.add.image(-40, 40 + i * 18, 'chr_fairy', 0).setScale(0.6).setAlpha(0.8);
       b.speed = 0.25 + Math.random() * 0.35;
       b.phase = Math.random() * 6;
       b.x = Math.random() * W;
@@ -99,7 +100,7 @@ export class TitleScene extends Phaser.Scene {
     const tw = textWidth(title) * 3;
     const tx = Math.round((W - tw) / 2);
     for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [2, 3]]) makeText(this, tx + dx, 28 + dy, title, 0x000000).setScale(3);
-    this.titleText = makeText(this, tx, 28, title, 0xe83a3a).setScale(3);
+    this.titleText = makeText(this, tx, 28, title, 0xf0c850).setScale(3);
     const st = STORY.subtitle;
     makeText(this, Math.round((W - textWidth(st)) / 2), 66, st, 0xb8a8c0);
     makeText(this, 4, H - 13, 'v0.1', COLORS.dim);
@@ -141,8 +142,8 @@ export class TitleScene extends Phaser.Scene {
     if (this.titleText) this.titleText.setAlpha(0.85 + Math.sin(time / 400) * 0.15);
     if (time > this.nextFlash) {
       this.nextFlash = time + 9000 + Math.random() * 9000;
-      this.tweens.add({ targets: this.flash, alpha: { from: 0.5, to: 0 }, duration: 350 });
-      if (Math.random() < 0.6) this.time.delayedCall(300, () => Audio.sfx('bell'));
+      this.tweens.add({ targets: this.flash, alpha: { from: 0.18, to: 0 }, duration: 900 });
+      if (Math.random() < 0.6) this.time.delayedCall(100, () => Audio.sfx('bell'));
     }
     if (this.options) this.options.update(this.controls);
     else if (this.menu && !this.leaving) this.menu.update(this.controls);

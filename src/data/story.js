@@ -1,28 +1,28 @@
 // História de fundo e textos de abertura/encerramento.
 export const STORY = {
-  title: 'SINOS DE CINZA',
+  title: 'SINOS DA AURORA',
   subtitle: 'Capítulo I — O Sino Silencioso',
 
   prologue: [
-    'Há trezentos anos, o Reino de Valdren foi devorado pelo Rei Sem Rosto: uma fome sem forma que comia nomes. Quem perdia o nome perdia a memória, o rosto, a alma.',
-    'Santa Liora, a última rainha, arrancou os próprios ossos e com eles forjou quatro Sinos. Enquanto os Sinos de Ossos tocassem, o Rei dormiria sob a terra.',
-    'Os sinos foram escondidos pelo reino e entregues a guardiões. Com o tempo, os guardiões esqueceram por que guardavam. E os vivos esqueceram por que temiam o silêncio.',
-    'Hoje, uma névoa vermelha rasteja pelos bosques. Os mortos sussurram nas covas. Crianças desaparecem da pequena vila de Cinzalva.',
-    'E o sino da capela, que tocava sozinho a cada anoitecer desde que a vila existe... parou.',
+    'Há trezentos anos, Morvath, o Rei das Sombras, cobriu o Reino de Valdren com uma noite sem fim. Onde sua sombra passava, a luz se apagava e os campos morriam.',
+    'A Rainha Liora forjou quatro Sinos de Cristal com a primeira luz de um amanhecer. Quando eles tocaram juntos, Morvath foi selado sob as montanhas.',
+    'Os Sinos da Aurora foram confiados a guardiões espalhados pelo reino. Enquanto tocarem a cada alvorada, o selo permanece firme.',
+    'Mas, nesta primavera, o sino do templo da pequena vila de Aldenor não tocou. Criaturas sombrias rondam os bosques, e uma névoa púrpura cobre a Floresta Ancestral.',
+    'E na noite passada, a pequena Lia seguiu luzes dançantes até o bosque... e não voltou.',
   ],
 
-  nightmare: ['...Aren...', '...que nome bonito...', '...eu vou lembrar dele...'],
+  dream: ['...Aren...', '...a aurora está se apagando...', '...encontre os sinos...'],
 
   ending: [
     'Fim do Capítulo I',
     'O Sino Silencioso',
     '',
-    'Lia voltou para casa, mas trouxe consigo um eco: o Rei Sem Rosto já começou a lembrar.',
-    'Dois Sinos de Ossos foram encontrados. Dois ainda soam em algum lugar de Valdren.',
-    'E toda noite, na cabana do coveiro, alguém bate três vezes na porta... e diz o nome de Aren.',
+    'Lia voltou para casa, e dois fragmentos dos Sinos de Cristal brilham outra vez nas mãos de Aren.',
+    'Mas, nas montanhas ao norte, Morvath sentiu a luz voltar. E as sombras começaram a se mover.',
+    'Para restaurar o selo, os heróis terão de reunir os quatro sinos antes da próxima lua nova.',
     '',
     'Continua no Capítulo II — A Abadia de Vel-Noar',
   ],
 
-  gameover: ['A VIGÍLIA TERMINOU', 'Os sinos calaram. Ninguém lembrará os seus nomes.'],
+  gameover: ['A AURORA SE APAGOU', 'As sombras cobriram Valdren... mas a luz pode renascer.'],
 };

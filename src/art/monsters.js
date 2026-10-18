@@ -25,10 +25,9 @@ const PAINT = {
     px(c, 40, 10, p.e);
     px(c, 39, 9, '#ffffff');
     for (let x = 41; x < 47; x += 2) px(c, x, 17, '#e8e0d0');
-    // sarna: pele exposta e costelas
-    ellipse(c, 24, 17, 4, 3, p.s);
-    for (let i = 0; i < 3; i++) line(c, 21 + i * 2, 15, 22 + i * 2, 19, shade(p.s, -0.3));
-    for (let i = 0; i < 20; i++) px(c, 10 + Math.floor(r() * 24), 11 + Math.floor(r() * 10), p.d);
+    // pelagem
+    for (let i = 0; i < 14; i++) px(c, 10 + Math.floor(r() * 24), 11 + Math.floor(r() * 6), p.d);
+    for (let i = 0; i < 6; i++) px(c, 14 + Math.floor(r() * 16), 19 + Math.floor(r() * 3), p.l);
   },
 
   bat(c, p) {
@@ -67,37 +66,6 @@ const PAINT = {
     for (let x = 12; x < 20; x++) px(c, x, 24 + (x % 2), OUT);
     px(c, 14, 26, '#8ab040');
     px(c, 14, 27, '#8ab040');
-  },
-
-  skeleton(c, p) {
-    const b = p.m;
-    const d = p.d;
-    line(c, 14, 14, 14, 27, b); // espinha
-    for (let y = 16; y < 25; y += 2) {
-      line(c, 9, y, 19, y, b);
-      px(c, 9, y + 1, d);
-      px(c, 19, y + 1, d);
-    }
-    ellipse(c, 14, 28, 5, 2, b);
-    thick(c, 11, 30, 9, 41, 1, b);
-    thick(c, 17, 30, 19, 41, 1, b);
-    rect(c, 7, 41, 4, 2, b);
-    rect(c, 18, 41, 4, 2, b);
-    thick(c, 8, 15, 5, 24, 1, b);
-    thick(c, 20, 15, 23, 22, 1, b);
-    // espada enferrujada
-    line(c, 23, 22, 27, 6, p.a);
-    line(c, 24, 22, 28, 6, shade(p.a, -0.3));
-    rect(c, 21, 21, 5, 2, '#5a4a3a');
-    disc(c, 14, 7, 6, b);
-    rect(c, 10, 11, 8, 3, b);
-    disc(c, 12, 7, 1, OUT);
-    disc(c, 16, 7, 1, OUT);
-    px(c, 12, 7, p.e);
-    px(c, 16, 7, p.e);
-    for (let x = 11; x < 18; x += 2) px(c, x, 12, OUT);
-    px(c, 14, 9, OUT);
-    disc(c, 12, 4, 1, shade(b, 0.3));
   },
 
   spider(c, p) {
@@ -160,27 +128,6 @@ const PAINT = {
     disc(c, 13, 13, 2, p.l);
   },
 
-  hanged(c, p) {
-    line(c, 13, 0, 13, 8, p.a);
-    ellipse(c, 13, 9, 4, 2, p.a);
-    disc(c, 12, 13, 5, p.s);
-    disc(c, 11, 12, 2, shade(p.s, 0.2));
-    px(c, 10, 13, '#e8e8e8');
-    px(c, 14, 13, '#e8e8e8');
-    px(c, 12, 16, '#5a1a2a');
-    rect(c, 7, 18, 12, 16, p.m);
-    rect(c, 7, 18, 3, 16, p.d);
-    poly(c, [[7, 34], [9, 37], [11, 34], [13, 38], [15, 34], [17, 37], [19, 34]], p.m);
-    thick(c, 6, 19, 4, 33, 1, p.m);
-    thick(c, 20, 19, 22, 33, 1, p.m);
-    px(c, 4, 34, p.s);
-    px(c, 22, 34, p.s);
-    thick(c, 11, 36, 11, 45, 1, p.d);
-    thick(c, 15, 36, 16, 45, 1, p.d);
-    rect(c, 10, 45, 3, 2, p.s);
-    rect(c, 15, 45, 3, 2, p.s);
-  },
-
   scarecrow(c, p) {
     rect(c, 17, 10, 3, 38, '#4a3220');
     rect(c, 2, 17, 33, 3, '#5a3e28');
@@ -230,6 +177,70 @@ const PAINT = {
     px(c, 18, 12, '#ffffff');
   },
 
+  goblin(c, p) {
+    // porrete
+    thick(c, 24, 26, 28, 8, 1, '#6a4a2a');
+    disc(c, 28, 7, 3, '#7a5a34');
+    px(c, 27, 5, '#a0a0a0');
+    px(c, 30, 8, '#a0a0a0');
+    // pernas e tanga
+    rect(c, 9, 26, 3, 7, p.d);
+    rect(c, 16, 26, 3, 7, p.d);
+    rect(c, 8, 32, 5, 2, '#3a2a1a');
+    rect(c, 15, 32, 5, 2, '#3a2a1a');
+    ellipse(c, 14, 20, 7, 7, p.m);
+    ellipse(c, 12, 18, 4, 4, p.l);
+    rect(c, 7, 23, 14, 4, '#6a4a2a');
+    rect(c, 7, 23, 14, 1, '#8a6a3a');
+    thick(c, 8, 16, 4, 24, 1, p.m);
+    thick(c, 20, 16, 24, 24, 1, p.m);
+    // cabeça com orelhas pontudas
+    poly(c, [[6, 8], [0, 3], [7, 12]], p.m);
+    poly(c, [[22, 8], [28, 3], [21, 12]], p.m);
+    disc(c, 14, 9, 7, p.m);
+    disc(c, 12, 7, 4, p.l);
+    px(c, 11, 9, p.e);
+    px(c, 17, 9, p.e);
+    px(c, 11, 8, '#ffffff');
+    line(c, 11, 13, 17, 13, '#2a1a10');
+    px(c, 12, 14, '#f0f0e0');
+    px(c, 16, 14, '#f0f0e0');
+    poly(c, [[13, 10], [15, 10], [14, 12]], p.d);
+  },
+
+  darkknight(c, p) {
+    // capa
+    poly(c, [[8, 14], [24, 14], [27, 42], [5, 42]], p.c);
+    // pernas
+    rect(c, 11, 32, 4, 10, p.d);
+    rect(c, 18, 32, 4, 10, p.d);
+    rect(c, 10, 41, 6, 3, p.m);
+    rect(c, 17, 41, 6, 3, p.m);
+    // tronco
+    rect(c, 9, 16, 15, 17, p.m);
+    rect(c, 9, 16, 4, 17, p.l);
+    rect(c, 9, 24, 15, 2, p.d);
+    rect(c, 15, 18, 3, 5, p.a);
+    // ombreiras
+    ellipse(c, 9, 17, 4, 3, p.l);
+    ellipse(c, 24, 17, 4, 3, p.m);
+    // escudo
+    poly(c, [[2, 20], [9, 19], [9, 30], [5, 34], [2, 30]], p.d);
+    poly(c, [[3, 21], [8, 20], [8, 29], [5, 32], [3, 29]], p.m);
+    px(c, 5, 25, p.a);
+    // espada
+    line(c, 26, 30, 31, 4, '#c8ccd8');
+    line(c, 27, 30, 32, 5, '#7a7e8a');
+    rect(c, 23, 29, 6, 2, p.a);
+    // elmo com visor brilhante
+    disc(c, 16, 9, 6, p.m);
+    disc(c, 14, 7, 3, p.l);
+    rect(c, 10, 8, 12, 2, '#0a0610');
+    px(c, 13, 8, p.e);
+    px(c, 18, 8, p.e);
+    poly(c, [[16, 0], [18, 4], [14, 4]], p.a);
+  },
+
   // ---------- chefes ----------
   weaver(c, p) {
     const legs = [
@@ -242,26 +253,26 @@ const PAINT = {
     }
     ellipse(c, 32, 30, 22, 16, p.m);
     ellipse(c, 28, 25, 14, 9, p.l);
-    // caveira no abdômen
-    disc(c, 32, 29, 8, '#1a1018');
-    disc(c, 32, 28, 7, p.s);
-    disc(c, 29, 27, 2, '#1a1018');
-    disc(c, 35, 27, 2, '#1a1018');
-    poly(c, [[32, 30], [31, 32], [33, 32]], '#1a1018');
-    for (let x = 28; x < 37; x += 2) rect(c, x, 34, 1, 2, '#1a1018');
+    // marcas de joia no abdômen
+    poly(c, [[32, 20], [37, 28], [32, 36], [27, 28]], '#2a1030');
+    poly(c, [[32, 22], [35, 28], [32, 34], [29, 28]], '#c03a5a');
+    poly(c, [[32, 22], [32, 34], [29, 28]], '#e86a8a');
+    for (const [x, y] of [[20, 24], [44, 24], [24, 36], [40, 36]]) disc(c, x, y, 2, '#8a3a6a');
     // tronco humanoide
     ellipse(c, 58, 34, 9, 7, p.m);
-    rect(c, 56, 16, 9, 16, p.s);
-    rect(c, 56, 16, 3, 16, shade(p.s, -0.25));
+    rect(c, 56, 16, 9, 16, '#7a4a9a');
+    rect(c, 56, 16, 3, 16, '#5a3478');
+    rect(c, 59, 18, 3, 2, '#e8c050');
     thick(c, 56, 18, 50, 28, 1, p.s);
     thick(c, 64, 18, 72, 26, 1, p.s);
     line(c, 72, 26, 76, 24, p.s);
     line(c, 72, 26, 76, 28, p.s);
     disc(c, 60, 10, 6, p.s);
-    poly(c, [[53, 6], [60, 1], [67, 6], [68, 22], [64, 14], [56, 14], [52, 24]], '#140c14');
-    px(c, 58, 10, '#f02020');
-    px(c, 62, 10, '#f02020');
-    line(c, 58, 13, 62, 13, '#401018');
+    poly(c, [[53, 6], [60, 3], [67, 6], [68, 22], [64, 14], [56, 14], [52, 24]], '#d8d4e8');
+    for (const x of [56, 60, 64]) poly(c, [[x - 2, 4], [x, 0], [x + 2, 4]], '#e8c050');
+    px(c, 58, 10, '#a02060');
+    px(c, 62, 10, '#a02060');
+    line(c, 59, 13, 61, 13, '#802040');
     // teias
     for (let i = 0; i < 4; i++) line(c, 30 + i * 6, 46, 26 + i * 8, 63, '#c8c4d4');
   },
@@ -290,33 +301,30 @@ const PAINT = {
       poly(c, [[x, 61], [x + 1.5, 64], [x + 3, 61]], '#d8c8a8');
       poly(c, [[x, 71], [x + 1.5, 68], [x + 3, 71]], '#d8c8a8');
     }
-    // corpos pendurados
-    for (const [x, y] of [[12, 40], [78, 36]]) {
-      line(c, x, y - 8, x, y, '#a8986a');
-      disc(c, x, y + 2, 2, '#a89a88');
-      rect(c, x - 2, y + 4, 5, 8, '#3a3430');
-      line(c, x - 1, y + 12, x - 1, y + 16, '#2a2422');
-      line(c, x + 1, y + 12, x + 1, y + 16, '#2a2422');
+    // frutos sombrios e vaga-lumes
+    for (const [x, y] of [[12, 34], [78, 30], [30, 30], [60, 28]]) {
+      disc(c, x, y, 2, '#6a2a8a');
+      px(c, x - 1, y - 1, '#c080e0');
     }
   },
 };
 
 export const MONSTER_ART = {
-  wolf: { w: 48, h: 32, paint: 'wolf', pal: { m: '#5a5048', l: '#7a6e62', d: '#3a322c', s: '#b08080', e: '#f03030' } },
-  wolf_black: { w: 48, h: 32, paint: 'wolf', pal: { m: '#2a2630', l: '#403a48', d: '#18141c', s: '#8a5a6a', e: '#f0d030' } },
-  bat: { w: 36, h: 24, paint: 'bat', pal: { m: '#4a3040', l: '#6a4a5a', d: '#2a1a24', e: '#f03030' } },
-  mushroom: { w: 32, h: 32, paint: 'mushroom', pal: { m: '#8a2a2a', l: '#aa4038', d: '#5a1818', s: '#d8c8b0', e: '#f0e040' } },
-  skeleton: { w: 30, h: 44, paint: 'skeleton', pal: { m: '#d8d0b8', d: '#9a927c', a: '#8a6a4a', e: '#f03030' } },
-  spider: { w: 44, h: 30, paint: 'spider', pal: { m: '#3a2a3e', l: '#5a4660', d: '#1e1622', a: '#b02030', e: '#f04040' } },
-  larva: { w: 42, h: 28, paint: 'larva', pal: { m: '#c8b8a8', l: '#e0d4c4', d: '#9a8a7a', e: '#5a1a2a' } },
-  ghost: { w: 30, h: 36, paint: 'ghost', pal: { m: '#a8b8d0', l: '#d0dcec', e: '#f04040' }, alpha: 0.8 },
-  crow: { w: 32, h: 26, paint: 'crow', pal: { m: '#1e1e2a', l: '#34344a', d: '#121218', a: '#c8a040', e: '#f03030' } },
-  hanged: { w: 26, h: 48, paint: 'hanged', pal: { m: '#4a4038', d: '#2e2620', a: '#8a7a5a', s: '#8a9a88' } },
-  scarecrow: { w: 38, h: 48, paint: 'scarecrow', pal: { m: '#5a4a6a', d: '#3a2a3a', a: '#7a3a2a', e: '#f04020' } },
-  roots: { w: 40, h: 32, paint: 'roots', pal: { m: '#4a2e20', l: '#6a4430', d: '#2a1810' } },
-  eye: { w: 34, h: 36, paint: 'eye', pal: { m: '#d8c0c0', l: '#f0e0e0', d: '#5a3040', a: '#8ab030' } },
-  weaver: { w: 88, h: 64, paint: 'weaver', pal: { m: '#d0c8b4', l: '#e8e0d0', d: '#5a4a50', s: '#c8bca8' } },
-  tree: { w: 90, h: 92, paint: 'tree', pal: { m: '#3e2a20', d: '#24160e', a: '#6a1a1e', e: '#f8d040' } },
+  wolf: { w: 48, h: 32, paint: 'wolf', pal: { m: '#6e6a66', l: '#8e8a84', d: '#4a4642', s: '#c0a8a0', e: '#f0c030' } },
+  wolf_black: { w: 48, h: 32, paint: 'wolf', pal: { m: '#2e2a3e', l: '#463e5a', d: '#1a1626', s: '#6a5a8a', e: '#c060ff' } },
+  bat: { w: 36, h: 24, paint: 'bat', pal: { m: '#4a3a5a', l: '#6a5a7a', d: '#2a2034', e: '#f0d040' } },
+  mushroom: { w: 32, h: 32, paint: 'mushroom', pal: { m: '#8a3a9a', l: '#aa5aba', d: '#5a2068', s: '#e0d4c0', e: '#f0e040' } },
+  goblin: { w: 32, h: 36, paint: 'goblin', pal: { m: '#5a9a4a', l: '#7aba5a', d: '#3a6a32', e: '#f03030' } },
+  spider: { w: 44, h: 30, paint: 'spider', pal: { m: '#3a2a3e', l: '#5a4660', d: '#1e1622', a: '#b02060', e: '#f04040' } },
+  larva: { w: 42, h: 28, paint: 'larva', pal: { m: '#6aaa4a', l: '#8aca62', d: '#4a7a36', e: '#f0c030' } },
+  shadow: { w: 30, h: 36, paint: 'ghost', pal: { m: '#3a2c5a', l: '#5a4a86', e: '#ff6a6a' }, alpha: 0.85 },
+  crow: { w: 32, h: 26, paint: 'crow', pal: { m: '#1e1e2a', l: '#34344a', d: '#121218', a: '#c8a040', e: '#c060ff' } },
+  darkknight: { w: 34, h: 44, paint: 'darkknight', pal: { m: '#3a3448', l: '#5a5270', d: '#221e2c', c: '#4a1a2a', a: '#9a7ad0', e: '#c060ff' } },
+  scarecrow: { w: 38, h: 48, paint: 'scarecrow', pal: { m: '#5a4a6a', d: '#3a2a3a', a: '#7a3a2a', e: '#c060ff' } },
+  roots: { w: 40, h: 32, paint: 'roots', pal: { m: '#4a3a28', l: '#6a5438', d: '#2a2014' } },
+  eye: { w: 34, h: 36, paint: 'eye', pal: { m: '#d8c8e0', l: '#f0e8f4', d: '#4a3060', a: '#8a40d0' } },
+  weaver: { w: 88, h: 64, paint: 'weaver', pal: { m: '#4a3a5a', l: '#6a5a7a', d: '#2a2034', s: '#e0d0e0' } },
+  tree: { w: 90, h: 92, paint: 'tree', pal: { m: '#3e2e26', d: '#24180e', a: '#3a2a5a', e: '#c060ff' } },
 };
 
 export function buildMonsters(scene) {

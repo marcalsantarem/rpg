@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('desktop', {
   writeSave: (slot, data) => ipcRenderer.invoke('saves:write', slot, data),
   deleteSave: (slot) => ipcRenderer.invoke('saves:delete', slot),
   quit: () => ipcRenderer.invoke('app:quit'),
+  shot: (name) => ipcRenderer.invoke('debug:shot', name),
 });

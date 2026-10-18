@@ -1,6 +1,6 @@
-# Sinos de Cinza
+# Sinos da Aurora
 
-RPG de fantasia e terror por turnos, no estilo dos clássicos 16-bit (Final Fantasy V / RPG Maker).
+RPG de fantasia medieval por turnos, no estilo dos clássicos 16-bit (Final Fantasy V / RPG Maker).
 Desktop via **Electron + Phaser 3**. Toda a arte (tiles, personagens, monstros, fontes) e a música
 chiptune são geradas em código; não há assets externos.
 
@@ -35,22 +35,24 @@ No navegador também dá para começar direto num mapa: `?debug=1&map=bosque&par
 
 ## História (Capítulo I — O Sino Silencioso)
 
-Há trezentos anos, Santa Liora prendeu o **Rei Sem Rosto**, uma fome que devora nomes, usando quatro
-**Sinos de Ossos**. Agora o sino da capela de **Cinzalva** parou, uma névoa vermelha se espalha e
-crianças desaparecem. **Aren**, um jovem coveiro que ouve os mortos, parte para encontrar a pequena Lia.
+Há trezentos anos, a Rainha Liora selou **Morvath, o Rei das Sombras**, com quatro **Sinos de Cristal**
+que tocam a cada alvorada. Agora o sino do templo de **Aldenor** silenciou, criaturas sombrias rondam os
+bosques e a pequena Lia desapareceu seguindo luzes no bosque. **Aren**, escudeiro da guarda com uma misteriosa
+Marca do Sol na mão, parte para encontrá-la.
 
-- **Selene** (Clériga): entra na capela da vila.
-- **Kael** (Caçador): preso num casulo na Caverna das Lamúrias.
-- **Mirela** (Bruxa): encontrada na Mata dos Enforcados.
+- **Selene** (Sacerdotisa): entra no Templo de Santa Liora.
+- **Kael** (Patrulheiro): preso num casulo na Gruta de Cristal.
+- **Mirela** (Maga): guardiã da Floresta Ancestral.
+- **Lumi**: fada da aurora que guia o grupo.
 
-Roteiro: Vila → Ancião → Capela (Selene + lanterna) → Bosque dos Sussurros → Caverna das Lamúrias
-(Kael, chefe **Tecelã de Ossos**) → Mata dos Enforcados (Mirela, chefe **Pai-Galho**) → fim do capítulo.
+Roteiro: Vila → Ancião → Templo (Selene + lanterna) → Bosque de Verdemar → Gruta de Cristal
+(Kael, chefe **Rainha Aranha**) → Floresta Ancestral (Mirela, chefe **Raizmor Corrompido**) → fim do capítulo.
 
 ## Sistemas
 
 - Exploração em grade com NPCs, baús, placas, sustos roteirizados, escuridão com lanterna e névoa.
 - Combate por turnos ordenado por agilidade: Atacar, Habilidade, Item, Defender, Fugir. Elementos
-  (Fogo, Luz, Trevas, Rito), mortos-vivos (cura causa dano), status (Veneno, Cegueira, Pavor, Sono), roubo.
+  (Fogo, Luz, Trevas, Aurora), criaturas sombrias (cura causa dano), status (Veneno, Cegueira, Medo, Sono), roubo.
 - Níveis, EXP, habilidades aprendidas por nível, equipamentos (arma, armadura, acessório).
 - Menu: Itens, Habilidades, Equipar, Status, Ordem do grupo, Salvar, Configurações.
 - Loja (compra/venda), pousada, altares de velas (restauram o grupo e permitem salvar).

@@ -1,12 +1,12 @@
 export const SHOPS = {
   odete: {
-    name: 'Mercearia da Viúva Odete',
-    greeting: 'Compre logo... antes que escureça de vez.',
-    stock: ['pocao', 'eter', 'antidoto', 'sal_bento', 'colirio', 'agua_benta', 'vela_retorno', 'pocao_forte'],
+    name: 'Mercearia da Odete',
+    greeting: 'Bem-vindos! Poções fresquinhas, recém-saídas do caldeirão.',
+    stock: ['pocao', 'eter', 'antidoto', 'erva_calmante', 'colirio', 'agua_sagrada', 'pluma_aurora', 'pocao_forte'],
   },
   bruno: {
     name: 'Forja do Bruno',
-    greeting: 'Aço bom não pergunta o que vai cortar.',
-    stock: ['pa_ferro', 'machado_coveiro', 'maca_bento', 'arco_curto', 'arco_teixo', 'grimorio', 'gibao_couro', 'manto_cinzento', 'cota_malha', 'capa_sombria', 'amuleto_prata', 'rosario'],
+    greeting: 'Aço de Aldenor! Não há lâmina melhor deste lado das montanhas.',
+    stock: ['espada_ferro', 'espada_longa', 'maca_sagrada', 'arco_curto', 'arco_teixo', 'grimorio', 'gibao_couro', 'manto_peregrino', 'cota_malha', 'capa_floresta', 'amuleto_prata', 'talisma_coragem'],
   },
 };

@@ -65,13 +65,13 @@ export class BattleScene extends Phaser.Scene {
       const same = ids.filter((x) => x === id).length > 1;
       const [x, y] = pos[i];
       const sprite = this.add.image(x, y, `mon_${d.sprite}`).setOrigin(0.5, 1).setDepth(5 + y / 100);
-      const alpha = { ghost: 0.8 }[d.sprite] ?? 1;
+      const alpha = { shadow: 0.85 }[d.sprite] ?? 1;
       sprite.setAlpha(alpha);
       return {
         isHero: false, def0: d, id, name: same ? `${d.name} ${String.fromCharCode(64 + counts[id])}` : d.name,
         hp: d.hp, mp: d.mp, maxHp: d.hp, maxMp: d.mp,
         atk: d.atk, def: d.def, mag: d.mag, res: d.res, agi: d.agi, luck: d.luck,
-        undead: !!d.undead, weak: d.weak ?? {}, boss: !!d.boss,
+        shadow: !!d.shadow, weak: d.weak ?? {}, boss: !!d.boss,
         status: new Set(), buffs: null, protects: new Set(d.boss ? ['sono'] : []), sprite, homeX: x, homeY: y, baseAlpha: alpha,
       };
     });
@@ -628,7 +628,7 @@ export class BattleScene extends Phaser.Scene {
       }
       case 'heal': {
         const amt = healAmount(a, s.power);
-        if (t.undead) await this.damage(t, amt);
+        if (t.shadow) await this.damage(t, amt);
         else this.heal(t, amt);
         await wait(this, 250);
         break;
@@ -682,7 +682,7 @@ export class BattleScene extends Phaser.Scene {
     if (u.heal) {
       Audio.sfx('heal');
       await this.playAnim('heal', [t], a);
-      if (t.undead) await this.damage(t, u.heal);
+      if (t.shadow) await this.damage(t, u.heal);
       else this.heal(t, u.heal);
     }
     if (u.mp) {

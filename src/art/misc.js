@@ -167,9 +167,20 @@ function eventSprites(scene) {
 
   // névoa vermelha que bloqueia caminhos
   c = makeCanvas(16, 24);
-  for (const [x, y, r] of [[5, 14, 5], [11, 12, 5], [8, 8, 5], [4, 19, 4], [12, 19, 4], [8, 17, 6]]) disc(c.ctx, x, y, r, 'rgba(150,20,30,0.45)');
-  for (const [x, y, r] of [[7, 12, 3], [10, 17, 3]]) disc(c.ctx, x, y, r, 'rgba(220,60,60,0.35)');
+  for (const [x, y, r] of [[5, 14, 5], [11, 12, 5], [8, 8, 5], [4, 19, 4], [12, 19, 4], [8, 17, 6]]) disc(c.ctx, x, y, r, 'rgba(110,60,170,0.45)');
+  for (const [x, y, r] of [[7, 12, 3], [10, 17, 3]]) disc(c.ctx, x, y, r, 'rgba(190,140,240,0.35)');
   addTexture(scene, 'obj_mist', c.canvas);
+
+  // mochila de viajante
+  c = makeCanvas(16, 16);
+  rect(c.ctx, 4, 5, 8, 9, '#7a5634');
+  rect(c.ctx, 4, 5, 8, 2, '#9a7046');
+  rect(c.ctx, 6, 9, 4, 3, '#5a3e24');
+  px(c.ctx, 7, 10, '#e0c060');
+  rect(c.ctx, 3, 13, 10, 1, '#4a3420');
+  rect(c.ctx, 5, 3, 6, 2, '#6a4428');
+  outlineCanvas(c.ctx, 16, 16, '#1a1010');
+  addTexture(scene, 'obj_pack', c.canvas);
 
   // sombra/vulto (para sustos)
   c = makeCanvas(16, 32);
@@ -237,11 +248,11 @@ function bgCave(ctx, r, web) {
   for (let x = 0; x < 320; x += 30 + Math.floor(r() * 30)) {
     poly(ctx, [[x, 112], [x + 6, 92 - Math.floor(r() * 10)], [x + 12, 112]], '#3a2e34');
   }
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 10; i++) {
     const x = Math.floor(r() * 320);
-    const y = 120 + Math.floor(r() * 36);
-    line(ctx, x, y, x + 6, y - 2, '#c8c0a8');
-    px(ctx, x + 7, y - 3, '#c8c0a8');
+    const y = 118 + Math.floor(r() * 38);
+    poly(ctx, [[x, y], [x + 2, y - 7], [x + 4, y]], '#4a90d0');
+    line(ctx, x + 1, y - 1, x + 2, y - 6, '#9ad8f8');
   }
   if (web) {
     const webAt = (cx, cy, R) => {
@@ -262,8 +273,9 @@ function bgCave(ctx, r, web) {
 }
 
 function bgGrove(ctx, r) {
-  bgForest(ctx, r, { sky0: '#2a0608', sky1: '#5a1418', far: '#30080c', mid: '#1a0406', ground: '#2a1a16', mist: '#6a2a2a', moon: '#e8a080', dead: true });
-  for (let i = 0; i < 10; i++) curve(ctx, Math.floor(r() * 320), 160, Math.floor(r() * 320), 120, Math.floor(r() * 320), 112, 2, '#3a2016');
+  bgForest(ctx, r, { sky0: '#120a24', sky1: '#3a2a60', far: '#22183a', mid: '#140e26', ground: '#262234', mist: '#7a5ab0', moon: '#f0f0ff', dead: true });
+  for (let i = 0; i < 10; i++) curve(ctx, Math.floor(r() * 320), 160, Math.floor(r() * 320), 120, Math.floor(r() * 320), 112, 2, '#3a2a3a');
+  for (let i = 0; i < 40; i++) px(ctx, Math.floor(r() * 320), 60 + Math.floor(r() * 90), r() < 0.5 ? '#f0e080' : '#a0f0e0');
 }
 
 export function buildBattleBackgrounds(scene) {
@@ -273,7 +285,7 @@ export function buildBattleBackgrounds(scene) {
     addTexture(scene, key, canvas);
   };
   make('bg_forest', (c, r) => bgForest(c, r, { sky0: '#0e1422', sky1: '#2a3040', far: '#1a2a26', mid: '#0e1a16', ground: '#2a3a24', mist: '#4a5a5a', moon: '#d8d4c0' }));
-  make('bg_deadforest', (c, r) => bgForest(c, r, { sky0: '#1a0a10', sky1: '#4a1a20', far: '#2a1218', mid: '#140a0c', ground: '#262220', mist: '#5a2a2a', moon: '#c85040', dead: true }));
+  make('bg_deadforest', (c, r) => bgForest(c, r, { sky0: '#0c0a1e', sky1: '#2a2050', far: '#1a2a34', mid: '#0e1a22', ground: '#1e2a2a', mist: '#5a4a8a', moon: '#e0e0f0' }));
   make('bg_cave', (c, r) => bgCave(c, r, false));
   make('bg_web', (c, r) => bgCave(c, r, true));
   make('bg_grove', (c, r) => bgGrove(c, r));

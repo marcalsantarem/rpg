@@ -1,15 +1,13 @@
-// Bosque dos Sussurros: liga a vila à Caverna (leste) e à Mata dos Enforcados (norte).
+// Bosque de Verdemar: liga a vila à Gruta de Cristal (leste) e à Floresta Ancestral (norte).
 const L = (l, r) => `${l}::${r}`;
 
 export const bosque = {
   id: 'bosque',
-  name: 'Bosque dos Sussurros',
+  name: 'Bosque de Verdemar',
   music: 'forest',
   base: 'grass',
   banner: true,
-  dark: 0.3,
-  lightRadius: 90,
-  fog: { color: 0x8090a0, alpha: 0.18 },
+  fog: { color: 0xc0d8e0, alpha: 0.1 },
   encounters: {
     rate: [14, 28],
     bg: 'bg_forest',
@@ -71,8 +69,8 @@ export const bosque = {
       cond: (f) => !f.boss1,
       script: async (a) => {
         await a.sfx('whisper');
-        await a.say(null, 'Uma névoa vermelha e espessa bloqueia a trilha para o norte. Lá dentro, algo respira devagar.');
-        await a.say('Selene', 'Não, Aren. Sinto que ela devoraria a chama da lanterna. Precisamos de algo mais forte que isso.');
+        await a.say(null, 'Uma névoa púrpura e espessa bloqueia a trilha para o norte. Ela parece... viva.');
+        await a.say('Selene', 'É magia sombria, Aren. A lanterna sozinha não é forte o bastante para dissipá-la.');
         await a.movePlayer('D');
       },
     },
@@ -82,18 +80,18 @@ export const bosque = {
       script: async (a) => {
         a.set('mist_gone');
         await a.sfx('bell');
-        await a.say(null, 'O Fragmento do Sino vibra na bolsa de Aren. Um som grave, quase inaudível...');
-        await a.say(null, 'A névoa vermelha recua, como uma fera ferida, abrindo a trilha para a Mata dos Enforcados.');
-        await a.say('Kael', 'Ótimo. Agora o caminho para o lugar mais assustador da região está livre. Que sorte a nossa.');
+        await a.say(null, 'O Cristal da Aurora brilha na bolsa de Aren e solta um som claro, como um pequeno sino.');
+        await a.say(null, 'A névoa púrpura se desfaz em fiapos de luz, abrindo a trilha para a Floresta Ancestral.');
+        await a.say('Kael', 'Agora sim! Esse cristal é mais útil que muito mapa que eu já comprei.');
       },
     },
     {
-      type: 'obj', id: 'viajante', x: 7, y: 16, texture: 'obj_bones', solid: true,
+      type: 'obj', id: 'viajante', x: 7, y: 16, texture: 'obj_pack', solid: true,
       script: async (a) => {
-        await a.say(null, 'Restos de um viajante. Na mão ossuda, um bilhete: "Se ouvir alguém chamar seu nome no bosque, não responda. NÃO RESPONDA."');
+        await a.say(null, 'Uma mochila de viajante esquecida. Dentro, um bilhete: "Luzes coloridas dançando entre as árvores. Lindas... mas não as siga."');
         if (!a.flag('viajante_erva')) {
           a.set('viajante_erva');
-          a.give('erva_amarga', 2);
+          a.give('erva_medicinal', 2);
         }
       },
     },
@@ -102,26 +100,19 @@ export const bosque = {
       cond: (f) => !f.doll_found,
       script: async (a) => {
         a.set('doll_found');
-        await a.music(null);
-        await a.sfx('whisper');
-        await a.wait(600);
-        await a.say('???', '...Aren... Aren...');
-        await a.say('Selene', 'Você ouviu isso? Alguém chamou seu nome!');
-        await a.spawn('fantasma_lia', 'ghostgirl', 25, 12, 'left', 0.6);
-        await a.wait(500);
-        await a.say('Menina pálida', 'Está tão escuro lá dentro... A moça canta tão bonito... Ela disse que eu posso dormir para sempre...');
-        await a.say('Aren', 'Lia? Lia, é você?!');
-        await a.move('fantasma_lia', 'RR', 260);
-        await a.sfx('scream');
-        await a.flash(0xffffff, 200);
-        await a.remove('fantasma_lia');
+        await a.sfx('light');
+        await a.spawn('lumi', 'fairy', 25, 12, 'left', 1);
         await a.wait(400);
-        await a.say(null, 'No lugar onde a menina estava, há uma boneca de pano encharcada.');
+        await a.say('???', 'Até que enfim alguém com luz no coração! Ei, aqui! Aqui embaixo... quer dizer, aqui em cima!');
+        await a.say('Lumi', 'Eu sou Lumi, uma fada da aurora. As luzes que levaram a menina eram fogos-fátuos sombrios, enfeitiçados pela Rainha Aranha!');
+        await a.say('Aren', 'A Lia! Você sabe onde ela está?');
+        await a.say('Lumi', 'Eles a levaram para a Gruta de Cristal, a leste. Ela deixou cair isto. Vou na frente, sigam minha luz!');
         a.give('boneca', 1, true);
         await a.sfx('item');
-        await a.say(null, 'Aren pegou a Boneca de Pano.');
-        await a.say('Selene', 'Ela foi para o leste... para a caverna. Aren, aquela menina não tinha sombra.');
-        await a.music('forest');
+        await a.say(null, 'Aren recebeu a Boneca de Pano.');
+        await a.move('lumi', 'RR', 220);
+        await a.remove('lumi');
+        await a.say('Selene', 'Uma fada de verdade! Nos livros do templo elas são mensageiras de Liora. Vamos, Aren, para a gruta!');
       },
     },
   ],

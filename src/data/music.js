@@ -23,22 +23,22 @@ export const SONGS = {
   },
 
   town: {
-    bpm: 108,
+    bpm: 112,
     tracks: [
       {
         inst: 'sq25', vol: 0.12, vib: true,
-        notes: `B4:6 G4:2 E4:4  G4:4 A4:4 B4:4  C5:6 B4:2 A4:4  F#4:8 B4:4
-                E5:6 D5:2 B4:4  C5:4 B4:4 G4:4  C5:4 A4:4 F#4:4  E4:12`,
+        notes: `D5:6 B4:2 G4:4  E5:4 D5:4 C5:4  A4:6 B4:2 C5:4  B4:8 G4:4
+                D5:6 E5:2 D5:4  G5:4 E5:4 C5:4  F#5:4 E5:4 D5:4  G5:12`,
       },
       {
         inst: 'tri', vol: 0.2,
-        notes: `E2:4 B2:4 B2:4  C2:4 G2:4 G2:4  A2:4 E3:4 E3:4  B1:4 F#2:4 F#2:4
-                E2:4 B2:4 B2:4  C2:4 G2:4 G2:4  A2:4 B1:4 B1:4  E2:12`,
+        notes: `G2:4 D3:4 D3:4  C3:4 G3:4 G3:4  D3:4 A3:4 A3:4  G2:4 D3:4 D3:4
+                G2:4 D3:4 D3:4  C3:4 G3:4 G3:4  D3:4 A3:4 A3:4  G2:12`,
       },
       {
         inst: 'sq12', vol: 0.05,
-        notes: `r:4 G3:4 B3:4  r:4 E3:4 G3:4  r:4 C4:4 E4:4  r:4 D#3:4 F#3:4
-                r:4 G3:4 B3:4  r:4 E3:4 G3:4  r:4 C4:4 D#4:4  r:4 B3:4 G3:4`,
+        notes: `r:4 B3:4 D4:4  r:4 E4:4 G4:4  r:4 F#4:4 A4:4  r:4 B3:4 D4:4
+                r:4 B3:4 D4:4  r:4 E4:4 G4:4  r:4 F#4:4 A4:4  r:4 B3:4 G3:4`,
       },
     ],
   },

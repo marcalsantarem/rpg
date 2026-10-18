@@ -40,6 +40,16 @@ ipcMain.handle('saves:delete', (_e, slot) => {
 
 ipcMain.handle('app:quit', () => app.quit());
 
+// Somente no modo --smoke: captura a janela em .shots/<nome>.png (usado por testes automatizados)
+ipcMain.handle('debug:shot', async (e, name) => {
+  if (!SMOKE) return false;
+  const img = await BrowserWindow.fromWebContents(e.sender).webContents.capturePage();
+  const dir = path.join(__dirname, '..', '.shots');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, `${String(name).replace(/[^a-z0-9_-]/gi, '')}.png`), img.toPNG());
+  return true;
+});
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 960,
@@ -68,7 +78,9 @@ function createWindow() {
   }
   if (SMOKE) {
     // SMOKE_JS: código opcional executado no jogo após o carregamento (para testar cenas específicas)
-    if (process.env.SMOKE_JS) setTimeout(() => win.webContents.executeJavaScript(process.env.SMOKE_JS).catch((e) => console.log(`[smoke] erro: ${e}`)), 2500);
+    // SMOKE_FILE: caminho de um arquivo .js com o mesmo propósito
+    const script = process.env.SMOKE_FILE ? fs.readFileSync(process.env.SMOKE_FILE, 'utf8') : process.env.SMOKE_JS;
+    if (script) setTimeout(() => win.webContents.executeJavaScript(script).catch((e) => console.log(`[smoke] erro: ${e}`)), 2500);
     setTimeout(async () => {
       const scenes = await win.webContents.executeJavaScript(
         "window.game ? JSON.stringify(window.game.scene.getScenes(true).map((s) => s.sys.settings.key)) : 'sem jogo'",
