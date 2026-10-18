@@ -56,7 +56,7 @@ function createWindow() {
     height: 720,
     useContentSize: true,
     backgroundColor: '#000000',
-    title: 'Sinos de Cinza',
+    title: 'Sinos da Aurora',
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

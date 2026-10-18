@@ -17,7 +17,13 @@ npm start
 | `npm run debug` | Abre com DevTools e atalhos de depuração |
 | `npm run check` | Valida mapas, eventos e referências de dados |
 | `npm run smoke` | Abre o Electron, registra erros do console e fecha sozinho |
-| `npm run serve` | Serve a pasta em `http://localhost:5173` para testar no navegador |
+| `npm run serve` | Serve a pasta em `http://localhost:5173` para testar como site estático |
+
+## Versão web
+
+A pasta do projeto já é um site estático: basta publicar a raiz do repositório (o Phaser fica em
+`vendor/`, sem depender de `node_modules`). No GitHub Pages: **Settings → Pages → Deploy from a branch →
+`main` / `(root)`**. No navegador os saves ficam no armazenamento local.
 
 ## Controles
 
@@ -56,7 +62,7 @@ Roteiro: Vila → Ancião → Templo (Selene + lanterna) → Bosque de Verdemar 
 - Níveis, EXP, habilidades aprendidas por nível, equipamentos (arma, armadura, acessório).
 - Menu: Itens, Habilidades, Equipar, Status, Ordem do grupo, Salvar, Configurações.
 - Loja (compra/venda), pousada, altares de velas (restauram o grupo e permitem salvar).
-- 3 slots de save (JSON em `%APPDATA%/sinos-de-cinza/saves`; no navegador, localStorage).
+- 3 slots de save (JSON em `%APPDATA%/sinos-da-aurora/saves`; no navegador, localStorage).
 
 ## Estrutura
 

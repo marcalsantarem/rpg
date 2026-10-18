@@ -1,8 +1,8 @@
 {
-  "name": "sinos-de-cinza",
-  "productName": "Sinos de Cinza",
+  "name": "sinos-da-aurora",
+  "productName": "Sinos da Aurora",
   "version": "0.1.0",
-  "description": "RPG de fantasia e terror por turnos, estilo clássico 16-bit.",
+  "description": "RPG de fantasia medieval por turnos, estilo clássico 16-bit.",
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
