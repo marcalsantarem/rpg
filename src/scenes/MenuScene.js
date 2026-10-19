@@ -1,12 +1,13 @@
 // Menu principal (sobreposto ao mapa): itens, habilidades, equipamento, status, ordem, salvar, config.
-import { W, H, COLORS } from '../config.js';
+import { UW, UH, COLORS } from '../config.js';
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { Settings } from '../core/Settings.js';
 import { State, heroStats, heroSkills, heroBaseStats, itemCount, removeItem, equip, formatTime } from '../core/GameState.js';
-import { Win, MenuList, drawBar } from '../ui/UI.js';
+import { Win, MenuList, drawBar, uiCamera } from '../ui/UI.js';
 import { wrapText } from '../core/Font.js';
 import { HEROES, expForLevel } from '../data/heroes.js';
+import { BATTLERS } from '../data/mzAssets.js';
 import { ITEMS, canEquip, STAT_NAMES } from '../data/items.js';
 import { SKILLS } from '../data/skills.js';
 import { MAP_NAMES } from '../data/maps/index.js';
@@ -22,6 +23,7 @@ export class MenuScene extends Phaser.Scene {
 
   create() {
     this.controls = new Controls(this);
+    uiCamera(this);
     this.stack = [];
     this.partyObjs = null;
     this.timeText = null;
@@ -54,26 +56,26 @@ export class MenuScene extends Phaser.Scene {
   // ------------------------------------------------------------ principal
   buildMain() {
     const objs = [];
-    const partyWin = new Win(this, 0, 0, 232, H);
+    const partyWin = new Win(this, 0, 0, 276, UH);
     objs.push(partyWin);
     this.partyWin = partyWin;
     this.drawParty();
 
-    const cmdWin = new Win(this, 232, 0, 88, 134);
+    const cmdWin = new Win(this, 276, 0, 92, 122);
     objs.push(cmdWin);
-    const locWin = new Win(this, 232, 134, 88, 46);
+    const locWin = new Win(this, 276, 122, 92, 38);
     objs.push(locWin);
     const name = MAP_NAMES[State.g.map.id] ?? '';
-    wrapText(name, 72).slice(0, 2).forEach((l, i) => locWin.text(8, 8 + i * 13, l, COLORS.gray));
-    const infoWin = new Win(this, 232, 180, 88, 60);
+    wrapText(name, 78).slice(0, 2).forEach((l, i) => locWin.text(7, 6 + i * 12, l, COLORS.gray));
+    const infoWin = new Win(this, 276, 160, 92, 48);
     objs.push(infoWin);
-    infoWin.text(8, 7, 'Moedas', COLORS.gray);
-    this.goldText = infoWin.textRight(80, 19, `${State.g.gold}`);
-    infoWin.text(8, 32, 'Tempo', COLORS.gray);
-    this.timeText = infoWin.textRight(80, 44, formatTime(State.g.playTime));
+    infoWin.text(7, 5, 'Moedas', COLORS.gray);
+    this.goldText = infoWin.textRight(84, 5, `${State.g.gold}`);
+    infoWin.text(7, 24, 'Tempo', COLORS.gray);
+    this.timeText = infoWin.textRight(84, 24, formatTime(State.g.playTime));
 
     const list = new MenuList(this, cmdWin, {
-      x: 20, y: 8, width: 64, rowH: 15,
+      x: 12, y: 6, width: 74, rowH: 13.5,
       items: [
         { label: 'Itens', v: 'items' },
         { label: 'Habilid.', v: 'skills' },
@@ -105,10 +107,13 @@ export class MenuScene extends Phaser.Scene {
     win.add(g);
     this.partyObjs.push(g);
     State.g.party.forEach((h, i) => {
-      const y = 8 + i * 58;
+      const y = 6 + i * 49;
       const def = HEROES[h.id];
       const s = heroStats(h);
-      const spr = this.add.image(28, y + 30, `chr_${def.sprite}`, 0).setOrigin(0.5, 1);
+      const faceKey = this.textures.exists(`face_${h.id}`) ? `face_${h.id}` : null;
+      const spr = faceKey
+        ? this.add.image(6, y + 1, faceKey).setOrigin(0).setScale(44 / 144)
+        : this.add.image(28, y + 40, `chr_${def.sprite}`, 0).setOrigin(0.5, 1).setScale(1 / 3);
       if (h.hp <= 0) spr.setTint(0x806070);
       win.add(spr);
       this.partyObjs.push(spr);
@@ -116,16 +121,16 @@ export class MenuScene extends Phaser.Scene {
         this.partyObjs.push(o);
         return o;
       };
-      add(win.text(48, y, def.name, i === highlight ? COLORS.yellow : COLORS.white));
-      add(win.text(48, y + 12, def.job, COLORS.gray));
-      add(win.text(130, y, `Nv ${h.level}`, COLORS.white));
-      add(win.text(130, y + 12, h.hp <= 0 ? 'Caído' : h.status?.length ? 'Mal' : '', h.hp <= 0 ? COLORS.red : COLORS.green));
-      add(win.text(48, y + 26, 'HP', COLORS.gray));
-      add(win.textRight(150, y + 26, `${h.hp}/${s.maxHp}`, h.hp < s.maxHp / 4 ? COLORS.orange : COLORS.white));
-      add(win.text(160, y + 26, 'MP', COLORS.gray));
-      add(win.textRight(222, y + 26, `${h.mp}/${s.maxMp}`, COLORS.blue));
-      drawBar(g, 48, y + 40, 100, h.hp / s.maxHp, 0x58c058);
-      drawBar(g, 160, y + 40, 60, s.maxMp ? h.mp / s.maxMp : 0, 0x5880e0);
+      add(win.text(58, y, def.name, i === highlight ? COLORS.yellow : COLORS.white));
+      add(win.text(58, y + 11, def.job, COLORS.gray));
+      add(win.text(150, y, `Nv ${h.level}`, COLORS.white));
+      add(win.text(150, y + 11, h.hp <= 0 ? 'Desmaiado' : h.status?.length ? 'Mal' : '', h.hp <= 0 ? COLORS.red : COLORS.green));
+      add(win.text(58, y + 23, 'HP', COLORS.gray));
+      add(win.textRight(162, y + 23, `${h.hp}/${s.maxHp}`, h.hp < s.maxHp / 4 ? COLORS.orange : COLORS.white));
+      add(win.text(172, y + 23, 'MP', COLORS.gray));
+      add(win.textRight(266, y + 23, `${h.mp}/${s.maxMp}`, COLORS.blue));
+      drawBar(g, 58, y + 36, 104, h.hp / s.maxHp, 0x58c058);
+      drawBar(g, 172, y + 36, 92, s.maxMp ? h.mp / s.maxMp : 0, 0x5880e0);
     });
     if (this.goldText) this.goldText.setText(`${State.g.gold}`);
   }
@@ -134,7 +139,7 @@ export class MenuScene extends Phaser.Scene {
   pickHero(cb, { filter, keep = false } = {}) {
     const items = State.g.party.map((h, i) => ({ label: '', i, enabled: filter ? filter(h) : true }));
     const list = new MenuList(this, this.partyWin, {
-      x: 14, y: 16, width: 200, rowH: 58, items,
+      x: 6, y: 6, width: 264, rowH: 49, items,
       onSelect: (it) => {
         if (!keep) this.pop();
         cb(it.i);
@@ -173,9 +178,9 @@ export class MenuScene extends Phaser.Scene {
   // ------------------------------------------------------------ itens
   itemsPage(back) {
     const objs = [];
-    const top = new Win(this, 0, 0, W, 24, { depth: 11000 });
+    const top = new Win(this, 0, 0, UW, 24, { depth: 11000 });
     const desc = top.text(8, 6, '');
-    const win = new Win(this, 0, 24, W, H - 24, { depth: 11000 });
+    const win = new Win(this, 0, 24, UW, UH - 24, { depth: 11000 });
     objs.push(top, win);
     const entries = () => {
       const inv = State.g.inventory;
@@ -196,7 +201,7 @@ export class MenuScene extends Phaser.Scene {
     };
     const showDesc = (it) => desc.setText(it ? ITEMS[it.id].desc : 'Nenhum item.');
     const list = new MenuList(this, win, {
-      x: 20, y: 8, width: 300, cols: 2, colW: 152, rowH: 13, visibleRows: 16, items: entries(),
+      x: 12, y: 7, width: UW - 20, cols: 2, colW: 174, rowH: 13, visibleRows: 13, items: entries(),
       onChange: showDesc,
       onSelect: (it) => {
         const item = ITEMS[it.id];
@@ -272,11 +277,11 @@ export class MenuScene extends Phaser.Scene {
   skillsPage(heroIdx, back) {
     const h = State.g.party[heroIdx];
     const objs = [];
-    const top = new Win(this, 0, 0, W, 24, { depth: 11000 });
+    const top = new Win(this, 0, 0, UW, 24, { depth: 11000 });
     const desc = top.text(8, 6, '');
-    const head = new Win(this, 0, 24, W, 24, { depth: 11000 });
+    const head = new Win(this, 0, 24, UW, 24, { depth: 11000 });
     const mpText = head.text(8, 6, '');
-    const win = new Win(this, 0, 48, W, H - 48, { depth: 11000 });
+    const win = new Win(this, 0, 48, UW, UH - 48, { depth: 11000 });
     objs.push(top, head, win);
     const refreshHead = () => {
       const s = heroStats(h);
@@ -291,7 +296,7 @@ export class MenuScene extends Phaser.Scene {
       });
     const showDesc = (it) => desc.setText(it ? SKILLS[it.id].desc ?? '' : '');
     const list = new MenuList(this, win, {
-      x: 20, y: 8, width: 300, cols: 2, colW: 152, rowH: 13, visibleRows: 14, items: entries(),
+      x: 12, y: 7, width: UW - 20, cols: 2, colW: 174, rowH: 13, visibleRows: 11, items: entries(),
       onChange: showDesc,
       onSelect: (it) => {
         const sk = SKILLS[it.id];
@@ -359,19 +364,17 @@ export class MenuScene extends Phaser.Scene {
   equipPage(heroIdx, back) {
     const h = State.g.party[heroIdx];
     const objs = [];
-    const top = new Win(this, 0, 0, W, 24, { depth: 11000 });
+    const top = new Win(this, 0, 0, UW, 24, { depth: 11000 });
     const desc = top.text(8, 6, '');
-    const statWin = new Win(this, 0, 24, 140, 136, { depth: 11000 });
-    const slotWin = new Win(this, 140, 24, 180, 58, { depth: 11000 });
-    const listWin = new Win(this, 140, 82, 180, 158, { depth: 11000 });
-    const bottom = new Win(this, 0, 160, 140, 80, { depth: 11000 });
+    const statWin = new Win(this, 0, 64, 150, 144, { depth: 11000 });
+    const slotWin = new Win(this, 150, 24, 218, 50, { depth: 11000 });
+    const listWin = new Win(this, 150, 74, 218, 134, { depth: 11000 });
+    const bottom = new Win(this, 0, 24, 150, 40, { depth: 11000 });
     objs.push(top, statWin, slotWin, listWin, bottom);
-    const spr = this.add.image(20, 26, `chr_${HEROES[h.id].sprite}`, 0).setOrigin(0.5, 1);
-    bottom.add(spr);
-    bottom.text(36, 8, HEROES[h.id].name, COLORS.yellow);
-    bottom.text(36, 20, `Nv ${h.level} ${HEROES[h.id].job}`, COLORS.gray);
-    bottom.text(10, 40, 'Z: equipar   X: voltar', COLORS.dim);
-    bottom.text(10, 54, 'Esq.: remover', COLORS.dim);
+    if (this.textures.exists(`face_${h.id}`)) bottom.add(this.add.image(6, 4, `face_${h.id}`).setOrigin(0).setScale(32 / 144));
+    bottom.text(44, 6, HEROES[h.id].name, COLORS.yellow);
+    bottom.text(44, 18, `Nv ${h.level} ${HEROES[h.id].job}`, COLORS.gray);
+    statWin.text(8, 126, 'Esq.: remover', COLORS.dim);
     let statTexts = [];
     const drawStats = (preview) => {
       statTexts.forEach((t) => t.destroy());
@@ -379,15 +382,15 @@ export class MenuScene extends Phaser.Scene {
       const cur = heroStats(h);
       const keys = ['hp', 'mp', 'atk', 'def', 'mag', 'res', 'agi', 'luck'];
       keys.forEach((k, i) => {
-        const y = 8 + i * 15;
+        const y = 6 + i * 14.5;
         const ck = k === 'hp' ? 'maxHp' : k === 'mp' ? 'maxMp' : k;
         statTexts.push(statWin.text(8, y, STAT_NAMES[k], COLORS.gray));
-        statTexts.push(statWin.textRight(84, y, `${cur[ck]}`));
+        statTexts.push(statWin.textRight(92, y, `${cur[ck]}`));
         if (preview) {
           const nv = preview[ck];
           const col = nv > cur[ck] ? COLORS.green : nv < cur[ck] ? COLORS.red : COLORS.white;
-          statTexts.push(statWin.text(90, y, '>', COLORS.dim));
-          statTexts.push(statWin.textRight(132, y, `${nv}`, col));
+          statTexts.push(statWin.text(98, y, '>', COLORS.dim));
+          statTexts.push(statWin.textRight(142, y, `${nv}`, col));
         }
       });
     };
@@ -397,7 +400,7 @@ export class MenuScene extends Phaser.Scene {
       slots.map((s) => ({ label: `${{ weapon: 'Arma', armor: 'Corpo', accessory: 'Acess.' }[s]} ${h.equip[s] ? ITEMS[h.equip[s]].name : '—'}`, s }));
     let pickList = null;
     const slotList = new MenuList(this, slotWin, {
-      x: 20, y: 7, width: 156, rowH: 15, items: slotItems(),
+      x: 12, y: 5, width: 200, rowH: 13, items: slotItems(),
       onChange: (it) => desc.setText(h.equip[it.s] ? ITEMS[h.equip[it.s]].desc : ''),
       onSelect: (it) => {
         const slot = it.s;
@@ -412,7 +415,7 @@ export class MenuScene extends Phaser.Scene {
           desc.setText(o && o.id ? ITEMS[o.id].desc : 'Remover o equipamento.');
         };
         pickList = new MenuList(this, listWin, {
-          x: 20, y: 8, width: 156, rowH: 13, visibleRows: 11, items: options,
+          x: 12, y: 7, width: 200, rowH: 13, visibleRows: 9, items: options,
           onChange: preview,
           onSelect: (o) => {
             equip(h, slot, o.id);
@@ -471,35 +474,40 @@ export class MenuScene extends Phaser.Scene {
       const def = HEROES[h.id];
       const s = heroStats(h);
       const base = heroBaseStats(h);
-      win = new Win(this, 0, 0, W, H, { depth: 11000 });
-      const spr = this.add.image(26, 40, `chr_${def.sprite}`, 0).setOrigin(0.5, 1).setScale(1.5);
-      win.add(spr);
-      win.text(50, 10, def.name, COLORS.yellow);
-      win.text(50, 22, def.job, COLORS.gray);
-      win.text(130, 10, `Nível ${h.level}`);
+      win = new Win(this, 0, 0, UW, UH, { depth: 11000 });
+      if (this.textures.exists(`face_${h.id}`)) win.add(this.add.image(8, 8, `face_${h.id}`).setOrigin(0).setScale(48 / 144));
+      if (this.textures.exists(`mz_sv_actors_${BATTLERS[h.id]}`)) {
+        const sv = this.add.sprite(334, 96, `mz_sv_actors_${BATTLERS[h.id]}`, 9).setOrigin(0.5, 1).setScale(2 / 3);
+        win.add(sv);
+        let p = 0;
+        this.time.addEvent({ delay: 160, repeat: -1, callback: () => sv.active && sv.setFrame(9 + [0, 1, 2, 1][++p % 4]) });
+      }
+      win.text(64, 8, def.name, COLORS.yellow);
+      win.text(64, 20, def.job, COLORS.gray);
+      win.text(150, 8, `Nível ${h.level}`);
       const next = expForLevel(h.level + 1);
-      win.text(130, 22, `EXP ${h.exp}`, COLORS.gray);
-      win.text(220, 10, 'Próximo', COLORS.gray);
-      win.textRight(310, 22, `${Math.max(0, next - h.exp)}`);
-      win.text(10, 50, 'HP', COLORS.gray);
-      win.textRight(110, 50, `${h.hp}/${s.maxHp}`);
-      win.text(10, 62, 'MP', COLORS.gray);
-      win.textRight(110, 62, `${h.mp}/${s.maxMp}`, COLORS.blue);
+      win.text(150, 20, `EXP ${h.exp}`, COLORS.gray);
+      win.text(236, 8, 'Próximo', COLORS.gray);
+      win.textRight(290, 20, `${Math.max(0, next - h.exp)}`);
+      win.text(8, 62, 'HP', COLORS.gray);
+      win.textRight(110, 62, `${h.hp}/${s.maxHp}`);
+      win.text(8, 74, 'MP', COLORS.gray);
+      win.textRight(110, 74, `${h.mp}/${s.maxMp}`, COLORS.blue);
       ['atk', 'def', 'mag', 'res', 'agi', 'luck'].forEach((k, i) => {
-        const y = 80 + i * 13;
-        win.text(10, y, STAT_NAMES[k], COLORS.gray);
-        win.textRight(100, y, `${s[k]}`);
+        const y = 88 + i * 12;
+        win.text(8, y, STAT_NAMES[k], COLORS.gray);
+        win.textRight(96, y, `${s[k]}`);
         const diff = s[k] - base[k];
-        if (diff) win.text(104, y, `${diff > 0 ? '+' : ''}${diff}`, diff > 0 ? COLORS.green : COLORS.red);
+        if (diff) win.text(100, y, `${diff > 0 ? '+' : ''}${diff}`, diff > 0 ? COLORS.green : COLORS.red);
       });
-      win.text(140, 50, 'Equipamento', COLORS.gray);
+      win.text(136, 62, 'Equipamento', COLORS.gray);
       ['weapon', 'armor', 'accessory'].forEach((sl, i) => {
-        win.text(140, 62 + i * 13, h.equip[sl] ? ITEMS[h.equip[sl]].name : '—');
+        win.text(136, 74 + i * 12, h.equip[sl] ? ITEMS[h.equip[sl]].name : '—');
       });
-      win.text(140, 108, 'Habilidades', COLORS.gray);
-      heroSkills(h).forEach((sk, i) => win.text(140 + (i % 2) * 88, 120 + Math.floor(i / 2) * 12, SKILLS[sk].name, COLORS.white));
-      wrapText(def.bio, 296).forEach((l, i) => win.text(10, 172 + i * 12, l, COLORS.gray));
-      if (State.g.party.length > 1) win.text(10, 222, '< >  trocar personagem', COLORS.dim);
+      win.text(136, 114, 'Habilidades', COLORS.gray);
+      heroSkills(h).forEach((sk, i) => win.text(136 + (i % 2) * 110, 126 + Math.floor(i / 2) * 11, SKILLS[sk].name, COLORS.white));
+      wrapText(def.bio, UW - 16).forEach((l, i) => win.text(8, 166 + i * 11, l, COLORS.gray));
+      if (State.g.party.length > 1) win.text(UW - 120, 194, '< >  trocar personagem', COLORS.dim);
     };
     build();
     this.push({
@@ -553,7 +561,7 @@ export class MenuScene extends Phaser.Scene {
 
   // ------------------------------------------------------------ configurações
   configPage(back) {
-    const win = new Win(this, 40, 60, 240, 110, { depth: 11000 });
+    const win = new Win(this, Math.round(UW / 2 - 120), 50, 240, 110, { depth: 11000 });
     win.text(14, 8, 'Configurações', COLORS.yellow);
     const speeds = ['', 'Lenta', 'Normal', 'Rápida', 'Instant.'];
     const rows = [
@@ -563,7 +571,7 @@ export class MenuScene extends Phaser.Scene {
     ];
     const items = () => rows.map((r) => ({ label: r.label, right: `< ${r.get()} >` }));
     const list = new MenuList(this, win, {
-      x: 34, y: 30, width: 200, rowH: 16, items: items(),
+      x: 18, y: 30, width: 210, rowH: 16, items: items(),
       onSelect: () => {},
       onCancel: () => {
         Settings.save();
@@ -591,11 +599,11 @@ export class MenuScene extends Phaser.Scene {
   }
 
   titlePage(back) {
-    const win = new Win(this, 60, 80, 200, 70, { depth: 11000 });
+    const win = new Win(this, Math.round(UW / 2 - 100), 70, 200, 70, { depth: 11000 });
     win.text(14, 10, 'Voltar à tela título?', COLORS.white);
     win.text(14, 22, 'O progresso não salvo será perdido.', COLORS.dim);
     const list = new MenuList(this, win, {
-      x: 34, y: 40, width: 160, rowH: 13, items: [{ label: 'Não' }, { label: 'Sim' }],
+      x: 18, y: 40, width: 170, rowH: 13, items: [{ label: 'Não' }, { label: 'Sim' }],
       onSelect: (_it, i) => {
         if (i === 1) {
           this.scene.stop('Map');

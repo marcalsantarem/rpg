@@ -1,10 +1,14 @@
 // Combate por turnos: inimigos à esquerda, grupo à direita, ordem por agilidade.
-import { W, H, COLORS } from '../config.js';
+import { UW, UH, COLORS } from '../config.js';
+import { BATTLERS, BATTLEBACKS, MOTIONS } from '../data/mzAssets.js';
+
+const FIELD_H = UH - 72; // altura do campo de batalha (acima das janelas)
+const LOOP_MOTIONS = new Set(['walk', 'wait', 'chant', 'guard', 'dying', 'abnormal', 'sleep', 'dead', 'victory', 'escape']);
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { State, heroStats, heroSkills, heroProtects, gainExp, addItem, removeItem, itemCount } from '../core/GameState.js';
 import { physDamage, magicDamage, healAmount, hitChance, critChance, fleeChance } from '../core/Formulas.js';
-import { Win, MenuList, makeText } from '../ui/UI.js';
+import { Win, MenuList, makeText, uiCamera } from '../ui/UI.js';
 import { textWidth } from '../core/Font.js';
 import { SKILLS, STATUS_NAMES } from '../data/skills.js';
 import { ITEMS } from '../data/items.js';
@@ -30,9 +34,12 @@ export class BattleScene extends Phaser.Scene {
     this.ui = null;
     this.ended = false;
     this.waitingOk = null;
-    this.add.image(0, 0, this.opts.bg || 'bg_forest').setOrigin(0);
-    this.add.rectangle(0, 160, W, 80, 0x000000).setOrigin(0);
+    uiCamera(this);
+    this.addBattleback(this.opts.bg || 'bg_forest');
+    this.add.rectangle(0, FIELD_H, UW, UH - FIELD_H, 0x000000).setOrigin(0);
     this.createCombatants();
+    // animação contínua dos battlers (padrão 0-1-2-1 do MZ)
+    this.time.addEvent({ delay: 170, loop: true, callback: () => this.tickMotions() });
     this.createWindows();
     Audio.play(this.opts.music || 'battle', { restart: true });
     this.cameras.main.fadeIn(200, 255, 255, 255);
@@ -44,16 +51,19 @@ export class BattleScene extends Phaser.Scene {
     const party = State.g.party;
     this.heroes = party.map((h, i) => {
       const s = heroStats(h);
-      const x = 262 + i * 7;
-      const y = 62 + i * 26;
-      const sprite = this.add.sprite(x, y, `chr_${HEROES[h.id].sprite}`, 3).setOrigin(0.5, 1).setDepth(10 + i);
+      const x = 292 + i * 10;
+      const y = 58 + i * 20;
+      const sprite = this.add.sprite(x, y, `mz_sv_actors_${BATTLERS[h.id]}`, 0).setOrigin(0.5, 1).setScale(1 / 3).setDepth(10 + i);
       const c = {
         isHero: true, ref: h, id: h.id, name: HEROES[h.id].name,
         hp: h.hp, mp: h.mp, maxHp: s.maxHp, maxMp: s.maxMp,
         atk: s.atk, def: s.def, mag: s.mag, res: s.res, agi: s.agi, luck: s.luck,
         status: new Set(), buffs: null, protects: heroProtects(h), sprite, homeX: x, homeY: y,
       };
+      c.motion = 'wait';
+      c.pattern = 0;
       if (c.hp <= 0) this.koPose(c);
+      else this.setMotion(c, this.baseMotion(c));
       return c;
     });
     const ids = this.opts.enemies;
@@ -64,8 +74,13 @@ export class BattleScene extends Phaser.Scene {
       counts[id] = (counts[id] ?? 0) + 1;
       const same = ids.filter((x) => x === id).length > 1;
       const [x, y] = pos[i];
-      const sprite = this.add.image(x, y, `mon_${d.sprite}`).setOrigin(0.5, 1).setDepth(5 + y / 100);
-      const alpha = { shadow: 0.85 }[d.sprite] ?? 1;
+      const key = `mz_enemies_${d.mz}`;
+      const src = this.textures.get(key).getSourceImage();
+      const maxH = d.boss ? 118 : 72;
+      const maxW = d.boss ? 170 : 110;
+      const sc = Math.min(1 / 3, maxH / src.height, maxW / src.width);
+      const sprite = this.add.image(x, y, key).setOrigin(0.5, 1).setScale(sc).setDepth(5 + y / 100);
+      const alpha = 1;
       sprite.setAlpha(alpha);
       return {
         isHero: false, def0: d, id, name: same ? `${d.name} ${String.fromCharCode(64 + counts[id])}` : d.name,
@@ -78,10 +93,69 @@ export class BattleScene extends Phaser.Scene {
   }
 
   enemyPositions(ids) {
-    if (ids.length === 1) return [[ENEMIES[ids[0]].boss ? 96 : 92, ENEMIES[ids[0]].boss ? 150 : 128]];
-    if (ids.length === 2) return [[64, 108], [134, 136]];
-    if (ids.length === 3) return [[52, 96], [130, 112], [76, 146]];
-    return ids.map((_, i) => [40 + (i % 2) * 80 + Math.floor(i / 2) * 20, 92 + Math.floor(i / 2) * 40 + (i % 2) * 14]);
+    if (ids.length === 1) return [[ENEMIES[ids[0]].boss ? 120 : 112, ENEMIES[ids[0]].boss ? 128 : 118]];
+    if (ids.length === 2) return [[72, 112], [168, 122]];
+    if (ids.length === 3) return [[60, 106], [150, 112], [106, 130]];
+    return ids.map((_, i) => [50 + (i % 2) * 90 + Math.floor(i / 2) * 24, 100 + Math.floor(i / 2) * 24 + (i % 2) * 8]);
+  }
+
+  // Fundo de batalha do MZ (chão + paredes), cobrindo a tela
+  addBattleback(key) {
+    const pair = BATTLEBACKS[key];
+    if (!pair) {
+      this.add.image(0, 0, key).setOrigin(0).setScale(UW / 320);
+      return;
+    }
+    pair.forEach((name, i) => {
+      const k = `mz_battlebacks${i + 1}_${name}`;
+      if (!this.textures.exists(k)) return;
+      const img = this.textures.get(k).getSourceImage();
+      const sc = Math.max(UW / img.width, UH / img.height);
+      this.add.image(UW / 2, UH / 2 - 14, k).setScale(sc);
+    });
+  }
+
+  // ------------------------------------------------------------ battlers (motions do MZ)
+  baseMotion(c) {
+    if (c.hp <= 0) return 'dead';
+    if (c.status.has('sono')) return 'sleep';
+    if (c.defending) return 'guard';
+    if (c.status.size) return 'abnormal';
+    if (c.hp < c.maxHp / 4) return 'dying';
+    return 'wait';
+  }
+
+  setMotion(c, motion) {
+    if (!c.isHero) return;
+    c.motion = motion;
+    c.pattern = 0;
+    this.applyMotionFrame(c);
+  }
+
+  applyMotionFrame(c) {
+    const m = MOTIONS[c.motion] ?? 1;
+    const seq = LOOP_MOTIONS.has(c.motion) ? [0, 1, 2, 1] : [0, 1, 2, 2];
+    const p = c.motion === 'dead' ? 2 : seq[c.pattern % 4];
+    c.sprite.setFrame((m % 6) * 9 + Math.floor(m / 6) * 3 + p);
+  }
+
+  tickMotions() {
+    for (const h of this.heroes ?? []) {
+      h.pattern++;
+      if (!LOOP_MOTIONS.has(h.motion) && h.pattern >= 4) {
+        h.motion = this.baseMotion(h);
+        h.pattern = 0;
+      }
+      this.applyMotionFrame(h);
+    }
+  }
+
+  motionFor(actor, act) {
+    if (act.item) return 'item';
+    const s = SKILLS[act.skill];
+    if (!s || act.skill === 'attack') return actor.id === 'kael' ? 'missile' : actor.id === 'mirela' || actor.id === 'selene' ? 'thrust' : 'swing';
+    if (s.type === 'phys') return 'skill';
+    return 'spell';
   }
 
   alive(list) {
@@ -98,12 +172,12 @@ export class BattleScene extends Phaser.Scene {
 
   // ------------------------------------------------------------ janelas
   createWindows() {
-    this.enemyWin = new Win(this, 0, 160, 120, 80);
-    this.partyWin = new Win(this, 120, 160, 200, 80);
+    this.enemyWin = new Win(this, 0, FIELD_H, 136, UH - FIELD_H);
+    this.partyWin = new Win(this, 136, FIELD_H, UW - 136, UH - FIELD_H);
     this.enemyTexts = [];
     this.partyTexts = [];
     this.refreshWindows();
-    this.topWin = new Win(this, 4, 4, 312, 22, { depth: 12000 });
+    this.topWin = new Win(this, 4, 4, UW - 8, 20, { depth: 12000 });
     this.topText = this.topWin.text(10, 5, '');
     this.topWin.setVisible(false);
   }
@@ -119,31 +193,31 @@ export class BattleScene extends Phaser.Scene {
       else names.push({ n: base, c: 1 });
     }
     names.slice(0, 5).forEach((n, i) => {
-      this.enemyTexts.push(this.enemyWin.text(10, 8 + i * 13, n.n.length > 14 ? `${n.n.slice(0, 13)}.` : n.n));
-      if (n.c > 1) this.enemyTexts.push(this.enemyWin.textRight(112, 8 + i * 13, `x${n.c}`, COLORS.gray));
+      this.enemyTexts.push(this.enemyWin.text(10, 6 + i * 12, n.n.length > 20 ? `${n.n.slice(0, 19)}.` : n.n));
+      if (n.c > 1) this.enemyTexts.push(this.enemyWin.textRight(128, 6 + i * 12, `x${n.c}`, COLORS.gray));
     });
     this.partyTexts.forEach((t) => t.destroy());
     this.partyTexts = [];
     this.heroes.forEach((h, i) => {
-      const y = 8 + i * 16;
+      const y = 5 + i * 15.5;
       let color = COLORS.white;
       if (h.hp <= 0) color = COLORS.red;
       else if (h === active) color = COLORS.yellow;
       else if (h.status.size) color = STATUS_COLOR[[...h.status][0]] ?? COLORS.white;
       this.partyTexts.push(this.partyWin.text(10, y, h.name, color));
       const hpColor = h.hp <= 0 ? COLORS.red : h.hp < h.maxHp / 4 ? COLORS.orange : COLORS.white;
-      this.partyTexts.push(this.partyWin.textRight(132, y, `${h.hp}/${h.maxHp}`, hpColor));
-      this.partyTexts.push(this.partyWin.textRight(190, y, `${h.mp}`, COLORS.blue));
+      this.partyTexts.push(this.partyWin.textRight(160, y, `${h.hp}/${h.maxHp}`, hpColor));
+      this.partyTexts.push(this.partyWin.textRight(222, y, `${h.mp}`, COLORS.blue));
       if (h.status.size && h.hp > 0) {
         const st = [...h.status].map((s) => STATUS_NAMES[s][0]).join('');
-        this.partyTexts.push(this.partyWin.text(56, y, st, STATUS_COLOR[[...h.status][0]]));
+        this.partyTexts.push(this.partyWin.text(62, y, st, STATUS_COLOR[[...h.status][0]]));
       }
     });
   }
 
   async banner(text, ms = 700) {
     this.topText.setText(text);
-    this.topText.setX(Math.round((312 - textWidth(text)) / 2));
+    this.topText.setX(Math.round((UW - 8 - textWidth(text)) / 2));
     this.topWin.setVisible(true);
     await wait(this, ms);
   }
@@ -228,6 +302,7 @@ export class BattleScene extends Phaser.Scene {
 
   heroStep(h, forward, ms = 120) {
     if (h.hp <= 0) return Promise.resolve();
+    if (!forward && h.motion === 'walk') this.setMotion(h, this.baseMotion(h));
     return new Promise((r) => this.tweens.add({ targets: h.sprite, x: h.homeX - (forward ? 16 : 0), duration: ms, onComplete: r }));
   }
 
@@ -235,8 +310,8 @@ export class BattleScene extends Phaser.Scene {
   commandMenu(hero, done) {
     this.refreshWindows(hero);
     this.heroStep(hero, true);
-    hero.sprite.setFrame(3);
-    const win = new Win(this, 0, 160, 96, 80, { depth: 11000 });
+    this.setMotion(hero, 'walk');
+    const win = new Win(this, 0, FIELD_H, 136, UH - FIELD_H, { depth: 11000 });
     const items = [
       { label: 'Atacar', v: 'attack' },
       { label: 'Habilidade', v: 'skill', enabled: heroSkills(hero.ref).length > 0 },
@@ -250,7 +325,7 @@ export class BattleScene extends Phaser.Scene {
       this.ui = null;
     };
     const list = new MenuList(this, win, {
-      x: 22, y: 7, width: 70, rowH: 13, items,
+      x: 12, y: 5, width: 120, rowH: 12.5, items,
       onSelect: (it) => {
         if (it.v === 'attack') {
           list.setActive(false);
@@ -302,7 +377,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   listWindow(entries, onPick, onCancel) {
-    const win = new Win(this, 0, 160, W, 80, { depth: 11500 });
+    const win = new Win(this, 0, FIELD_H, UW, UH - FIELD_H, { depth: 11500 });
     const close = () => {
       list.destroy();
       win.destroy();
@@ -316,7 +391,7 @@ export class BattleScene extends Phaser.Scene {
       } else this.hideBanner();
     };
     const list = new MenuList(this, win, {
-      x: 20, y: 8, width: 296, cols: 2, colW: 150, rowH: 13, visibleRows: 5, items: entries,
+      x: 12, y: 6, width: UW - 20, cols: 2, colW: 174, rowH: 12, visibleRows: 5, items: entries,
       onChange: showDesc,
       onSelect: (it) => {
         list.setActive(false);
@@ -424,7 +499,7 @@ export class BattleScene extends Phaser.Scene {
       }
       if (!all) {
         this.topText.setText(pool[idx].name);
-        this.topText.setX(Math.round((312 - textWidth(pool[idx].name)) / 2));
+        this.topText.setX(Math.round((UW - 8 - textWidth(pool[idx].name)) / 2));
         this.topWin.setVisible(true);
       }
     };
@@ -578,9 +653,8 @@ export class BattleScene extends Phaser.Scene {
         this.popup(a, `-${cost}`, COLORS.red);
       }
       if (act.skill !== 'attack') await this.banner(s.name, 450);
-      if (a.isHero) a.sprite.setFrame(4);
+      if (a.isHero) this.setMotion(a, this.motionFor(a, act));
       await this.playAnim(s.anim ?? 'slash', targets, a);
-      if (a.isHero) a.sprite.setFrame(3);
       for (const t of targets) await this.applySkill(a, t, s);
     }
     this.hideBanner();
@@ -748,6 +822,7 @@ export class BattleScene extends Phaser.Scene {
     this.popup(t, `${dmg}`, crit ? COLORS.yellow : COLORS.white);
     this.shakeSprite(t);
     if (t.isHero) {
+      if (t.hp > 0) this.setMotion(t, 'damage');
       t.sprite.setTint(0xff6060);
       this.time.delayedCall(160, () => t.sprite.clearTint());
     } else {
@@ -777,11 +852,13 @@ export class BattleScene extends Phaser.Scene {
   }
 
   koPose(h) {
-    h.sprite.setFrame(0).setAngle(-90).setTint(0x9090a0).setOrigin(0.5, 0.5).setPosition(h.homeX, h.homeY - 6);
+    h.sprite.setPosition(h.homeX, h.homeY);
+    this.setMotion(h, 'dead');
   }
 
   revivePose(h) {
-    h.sprite.setAngle(0).clearTint().setOrigin(0.5, 1).setPosition(h.homeX, h.homeY).setFrame(3);
+    h.sprite.clearTint().setPosition(h.homeX, h.homeY);
+    this.setMotion(h, 'wait');
   }
 
   shakeSprite(c) {
@@ -956,8 +1033,7 @@ export class BattleScene extends Phaser.Scene {
     this.ui = null;
     Audio.play('victory', { restart: true });
     for (const h of this.alive(this.heroes)) {
-      h.sprite.setFrame(0);
-      this.tweens.add({ targets: h.sprite, y: h.homeY - 6, duration: 160, yoyo: true, repeat: 3, delay: Math.random() * 200 });
+      this.setMotion(h, 'victory');
     }
     const exp = this.enemies.reduce((a, e) => a + e.def0.exp, 0);
     const gold = this.enemies.reduce((a, e) => a + e.def0.gold, 0);
@@ -1011,7 +1087,8 @@ export class BattleScene extends Phaser.Scene {
       this.ended = true;
       Audio.sfx('run');
       for (const h of this.alive(this.heroes)) {
-        h.sprite.setFrame(6);
+        this.setMotion(h, 'escape');
+        h.sprite.setFlipX(true);
         this.tweens.add({ targets: h.sprite, x: h.homeX + 80, duration: 500 });
       }
       await this.banner('Fugiram!', 700);

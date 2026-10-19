@@ -1,10 +1,10 @@
 // Tela de slots para salvar ou carregar.
-import { W, H, COLORS } from '../config.js';
+import { UW, UH, COLORS } from '../config.js';
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { SaveSystem } from '../core/SaveSystem.js';
 import { State, formatTime } from '../core/GameState.js';
-import { Win, MenuList } from '../ui/UI.js';
+import { Win, MenuList, uiCamera } from '../ui/UI.js';
 import { HEROES } from '../data/heroes.js';
 
 export class SaveLoadScene extends Phaser.Scene {
@@ -18,34 +18,33 @@ export class SaveLoadScene extends Phaser.Scene {
 
   async create() {
     this.controls = new Controls(this);
+    uiCamera(this);
     this.busy = true;
     this.list = null;
     this.confirm = null;
     const save = this.opts.mode === 'save';
-    this.add.rectangle(0, 0, W, H, 0x000000, 0.6).setOrigin(0);
-    const top = new Win(this, 0, 0, W, 26);
-    top.text(10, 7, save ? 'Salvar jornada — escolha um registro' : 'Carregar jornada — escolha um registro', COLORS.yellow);
+    this.add.rectangle(0, 0, UW, UH, 0x000000, 0.6).setOrigin(0);
+    const top = new Win(this, 0, 0, UW, 24);
+    top.text(10, 6, save ? 'Salvar jornada — escolha um registro' : 'Carregar jornada — escolha um registro', COLORS.yellow);
     this.slots = await SaveSystem.list();
-    this.slotWins = [];
+    const win = new Win(this, 0, 24, UW, UH - 24);
     this.slots.forEach((s, i) => {
-      const y = 30 + i * 70;
-      const win = new Win(this, 0, y, W, 68);
-      this.slotWins.push(win);
-      win.text(26, 8, `Registro ${i + 1}`, COLORS.gray);
+      const y = 6 + i * 59;
+      win.text(10, y + 2, `Registro ${i + 1}`, COLORS.gray);
       if (!s) {
-        win.text(26, 28, '— vazio —', COLORS.dim);
+        win.text(10, y + 22, '— vazio —', COLORS.dim);
         return;
       }
-      s.party.forEach((id, k) => win.add(this.add.image(120 + k * 20, 34, `chr_${HEROES[id].sprite}`, 0).setOrigin(0.5, 1)));
-      win.text(26, 22, `${s.leader}`, COLORS.white);
-      win.text(26, 36, `Nv ${s.level}`, COLORS.white);
-      win.text(210, 8, formatTime(s.time), COLORS.white);
-      win.text(120, 46, s.place, COLORS.gray);
+      s.party.forEach((id, k) => {
+        if (this.textures.exists(`face_${id}`)) win.add(this.add.image(96 + k * 46, y + 3, `face_${id}`).setOrigin(0).setScale(42 / 144));
+      });
+      win.text(10, y + 18, `${s.leader}`, COLORS.white);
+      win.text(10, y + 30, `Nv ${s.level}`, COLORS.white);
+      win.textRight(UW - 12, y + 2, formatTime(s.time), COLORS.white);
+      win.textRight(UW - 12, y + 30, s.place, COLORS.gray);
     });
-    const cursorWin = new Win(this, -100, -100, 10, 10);
-    cursorWin.setDepth(20000);
-    this.list = new MenuList(this, cursorWin, {
-      x: 124, y: 153, width: 10, rowH: 70,
+    this.list = new MenuList(this, win, {
+      x: 8, y: 5, width: UW - 12, rowH: 59,
       items: this.slots.map((s) => ({ label: '', enabled: save || !!s })),
       onSelect: (_it, i) => this.choose(i),
       onCancel: () => this.close(),
@@ -76,7 +75,7 @@ export class SaveLoadScene extends Phaser.Scene {
       await SaveSystem.save(slot);
       Audio.sfx('save');
       this.slots = await SaveSystem.list();
-      const w = new Win(this, 80, 100, 160, 30, { depth: 21000 });
+      const w = new Win(this, Math.round(UW / 2 - 80), 90, 160, 28, { depth: 21000 });
       w.text(20, 9, 'Jornada registrada.', COLORS.green);
       this.time.delayedCall(900, () => this.close());
       return;
@@ -99,10 +98,10 @@ export class SaveLoadScene extends Phaser.Scene {
 
   ask(question) {
     return new Promise((resolve) => {
-      const win = new Win(this, 70, 90, 180, 60, { depth: 21000 });
+      const win = new Win(this, Math.round(UW / 2 - 90), 80, 180, 58, { depth: 21000 });
       win.text(14, 8, question);
       const list = new MenuList(this, win, {
-        x: 34, y: 26, width: 140, rowH: 13, items: [{ label: 'Sim' }, { label: 'Não' }],
+        x: 18, y: 26, width: 150, rowH: 13, items: [{ label: 'Sim' }, { label: 'Não' }],
         onSelect: (_it, k) => done(k === 0),
         onCancel: () => done(false),
       });

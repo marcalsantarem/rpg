@@ -1,19 +1,18 @@
 // Prólogo, Game Over e Fim de Capítulo.
-import { W, H, COLORS } from '../config.js';
+import { UW, UH, COLORS } from '../config.js';
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { SaveSystem } from '../core/SaveSystem.js';
 import { State, formatTime } from '../core/GameState.js';
-import { Win, MenuList, makeText } from '../ui/UI.js';
+import { Win, MenuList, makeText, uiCamera } from '../ui/UI.js';
 import { wrapText, textWidth } from '../core/Font.js';
 import { STORY } from '../data/story.js';
 
 const wait = (scene, ms) => new Promise((r) => scene.time.delayedCall(ms, r));
 
 function centered(scene, y, str, color, scale = 1) {
-  const t = makeText(scene, Math.round((W - textWidth(str) * scale) / 2), y, str, color);
-  t.setScale(scale);
-  return t;
+  const size = Math.round(9 * scale);
+  return makeText(scene, Math.round((UW - textWidth(str, size)) / 2), y, str, color, size);
 }
 
 export class IntroScene extends Phaser.Scene {
@@ -23,10 +22,11 @@ export class IntroScene extends Phaser.Scene {
 
   create() {
     this.controls = new Controls(this);
-    this.fog = this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x403070).setAlpha(0.18);
+    uiCamera(this);
+    this.fog = this.add.tileSprite(0, 0, UW, UH, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x403070).setAlpha(0.18);
     this.skip = false;
     this.waitOk = null;
-    makeText(this, W - textWidth('X: pular') - 6, H - 14, 'X: pular', COLORS.dim);
+    makeText(this, UW - textWidth('X: pular') - 6, UH - 14, 'X: pular', COLORS.dim);
     Audio.play('title');
     this.run();
   }
@@ -50,8 +50,8 @@ export class IntroScene extends Phaser.Scene {
   async run() {
     for (const para of STORY.prologue) {
       if (this.skip) break;
-      const lines = wrapText(para, 270);
-      const y0 = Math.round(H / 2 - (lines.length * 13) / 2);
+      const lines = wrapText(para, 300);
+      const y0 = Math.round(UH / 2 - (lines.length * 13) / 2);
       const texts = lines.map((l, i) => centered(this, y0 + i * 13, l, 0xd8d0e0).setAlpha(0));
       this.tweens.add({ targets: texts, alpha: 1, duration: 900 });
       if (!this.skip) await this.okOr(900);
@@ -74,7 +74,7 @@ export class IntroScene extends Phaser.Scene {
     await wait(this, 600);
     this.cameras.main.flash(300, 255, 220, 140);
     for (const l of STORY.dream) {
-      const t = centered(this, 110, l, 0xf0d070).setAlpha(0);
+      const t = centered(this, 96, l, 0xf0d070).setAlpha(0);
       Audio.sfx('light');
       this.tweens.add({ targets: t, alpha: 1, duration: 500, yoyo: true, hold: 700 });
       await wait(this, 1800);
@@ -98,16 +98,17 @@ export class GameOverScene extends Phaser.Scene {
 
   async create() {
     this.controls = new Controls(this);
+    uiCamera(this);
     this.menu = null;
-    this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x302050).setAlpha(0.3);
-    centered(this, 70, STORY.gameover[0], 0xe0b050, 2);
-    centered(this, 104, STORY.gameover[1], 0xa898b0);
+    this.add.tileSprite(0, 0, UW, UH, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x302050).setAlpha(0.3);
+    centered(this, 56, STORY.gameover[0], 0xe0b050, 2);
+    centered(this, 90, STORY.gameover[1], 0xa898b0);
     Audio.play('gameover', { restart: true });
     this.cameras.main.fadeIn(1200, 0, 0, 0);
     const has = await SaveSystem.any();
-    const win = new Win(this, 100, 140, 120, 46);
+    const win = new Win(this, Math.round(UW / 2 - 60), 120, 120, 44);
     this.menu = new MenuList(this, win, {
-      x: 24, y: 8, width: 92, rowH: 15,
+      x: 14, y: 8, width: 100, rowH: 14,
       index: has ? 0 : 1,
       items: [
         { label: 'Carregar', enabled: has },
@@ -137,9 +138,10 @@ export class EndChapterScene extends Phaser.Scene {
 
   create() {
     this.controls = new Controls(this);
+    uiCamera(this);
     this.menu = null;
     this.waitOk = null;
-    this.add.tileSprite(0, 0, W, H, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x402030).setAlpha(0.2);
+    this.add.tileSprite(0, 0, UW, UH, 'fog').setOrigin(0).setTileScale(2.5, 1.5).setTint(0x402030).setAlpha(0.2);
     Audio.play('ending', { restart: true });
     this.cameras.main.fadeIn(1500, 0, 0, 0);
     this.run();
@@ -157,7 +159,7 @@ export class EndChapterScene extends Phaser.Scene {
 
   async run() {
     const lines = STORY.ending;
-    let y = 30;
+    let y = 18;
     const objs = [];
     for (let i = 0; i < lines.length; i++) {
       const l = lines[i];
@@ -166,7 +168,7 @@ export class EndChapterScene extends Phaser.Scene {
         continue;
       }
       const big = i === 0;
-      const wrapped = big ? [l] : wrapText(l, 280);
+      const wrapped = big ? [l] : wrapText(l, 320);
       for (const w of wrapped) {
         const t = centered(this, y, w, big ? 0xf0c050 : i === 1 ? 0xf8e078 : i === lines.length - 1 ? 0xb8a8c0 : 0xd8d0e0, big ? 2 : 1).setAlpha(0);
         objs.push(t);
@@ -176,13 +178,13 @@ export class EndChapterScene extends Phaser.Scene {
       }
     }
     await wait(this, 800);
-    centered(this, 196, `Tempo de jogo: ${formatTime(State.g.playTime)}`, COLORS.gray);
+    centered(this, 160, `Tempo de jogo: ${formatTime(State.g.playTime)}`, COLORS.gray);
     await wait(this, 600);
-    const win = new Win(this, 90, 208, 140, 28);
+    const win = new Win(this, Math.round(UW / 2 - 100), 176, 140, 26);
     win.text(10, 7, 'Salvar progresso?', COLORS.white);
-    const opt = new Win(this, 236, 196, 70, 40);
+    const opt = new Win(this, Math.round(UW / 2 + 44), 168, 70, 38);
     this.menu = new MenuList(this, opt, {
-      x: 22, y: 7, width: 44, rowH: 13,
+      x: 12, y: 6, width: 52, rowH: 13,
       items: [{ label: 'Sim' }, { label: 'Não' }],
       onSelect: (_it, i) => {
         if (i === 0) {

@@ -1,14 +1,15 @@
 // Tela inicial com cenário noturno animado.
-import { W, H, COLORS } from '../config.js';
+import { W, H, UW, UH, COLORS } from '../config.js';
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { Settings } from '../core/Settings.js';
 import { SaveSystem } from '../core/SaveSystem.js';
 import { newGame } from '../core/GameState.js';
-import { Win, MenuList, makeText } from '../ui/UI.js';
+import { Win, MenuList, makeText, uiCamera } from '../ui/UI.js';
 import { textWidth } from '../core/Font.js';
 import { makeCanvas, rng, px, rect, disc, poly, thick, mix, addTexture } from '../core/Pixel.js';
 import { STORY } from '../data/story.js';
+import { TITLE_IMAGE } from '../data/mzAssets.js';
 
 function buildTitleArt(scene) {
   if (scene.textures.exists('title_bg')) return;
@@ -80,33 +81,45 @@ export class TitleScene extends Phaser.Scene {
     this.leaving = false;
     this.options = null;
     this.menu = null;
-    buildTitleArt(this);
-    this.add.image(0, 0, 'title_bg').setOrigin(0);
-    this.fog1 = this.add.tileSprite(0, 150, W, 90, 'fog').setOrigin(0).setTint(0x8070c0).setAlpha(0.3);
-    this.fog2 = this.add.tileSprite(0, 170, W, 70, 'fog').setOrigin(0).setTint(0xb0a8e0).setAlpha(0.22);
+    uiCamera(this);
+    this.scene.stop('Hud');
+    this.scene.launch('Hud');
+    // ilustração de título do MZ cobrindo a tela
+    const bgKey = `mz_titles1_${TITLE_IMAGE}`;
+    if (this.textures.exists(bgKey)) {
+      const img = this.textures.get(bgKey).getSourceImage();
+      const sc = Math.max(W / img.width, H / img.height) / 3;
+      this.add.image(UW / 2, UH / 2, bgKey).setScale(sc);
+      this.add.rectangle(0, 0, UW, UH, 0x080418, 0.25).setOrigin(0);
+    } else {
+      buildTitleArt(this);
+      this.add.image(0, 0, 'title_bg').setOrigin(0);
+    }
+    this.fog1 = this.add.tileSprite(0, UH - 80, UW, 80, 'fog').setOrigin(0).setTint(0x8070c0).setAlpha(0.25);
+    this.fog2 = this.add.tileSprite(0, UH - 60, UW, 60, 'fog').setOrigin(0).setTint(0xb0a8e0).setAlpha(0.18);
 
     // morcegos
     this.bats = [];
     for (let i = 0; i < 4; i++) {
-      const b = this.add.image(-40, 40 + i * 18, 'chr_fairy', 0).setScale(0.6).setAlpha(0.8);
-      b.speed = 0.25 + Math.random() * 0.35;
+      const b = this.add.image(-40, 30 + i * 22, 'chr_fairy', 0).setScale(0.28).setAlpha(0.85);
+      b.speed = 0.15 + Math.random() * 0.25;
       b.phase = Math.random() * 6;
-      b.x = Math.random() * W;
+      b.x = Math.random() * UW;
       this.bats.push(b);
     }
 
     // título
     const title = STORY.title;
-    const tw = textWidth(title) * 3;
-    const tx = Math.round((W - tw) / 2);
-    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [2, 3]]) makeText(this, tx + dx, 28 + dy, title, 0x000000).setScale(3);
-    this.titleText = makeText(this, tx, 28, title, 0xf0c850).setScale(3);
+    const tw = textWidth(title, 28);
+    const tx = Math.round((UW - tw) / 2);
+    makeText(this, tx + 2, 30, title, 0x000000, 28).setAlpha(0.6);
+    this.titleText = makeText(this, tx, 28, title, 0xf0c850, 28);
     const st = STORY.subtitle;
-    makeText(this, Math.round((W - textWidth(st)) / 2), 66, st, 0xb8a8c0);
-    makeText(this, 4, H - 13, 'v0.1', COLORS.dim);
-    makeText(this, W - textWidth('Z: confirmar  X: voltar') - 4, H - 13, 'Z: confirmar  X: voltar', COLORS.dim);
+    makeText(this, Math.round((UW - textWidth(st)) / 2), 66, st, 0xe0d8f0);
+    makeText(this, 4, UH - 13, 'v0.2', COLORS.dim);
+    makeText(this, UW - textWidth('Z: confirmar  X: voltar') - 4, UH - 13, 'Z: confirmar  X: voltar', COLORS.dim);
 
-    this.flash = this.add.rectangle(0, 0, W, H, 0xffffff).setOrigin(0).setAlpha(0).setDepth(50000);
+    this.flash = this.add.rectangle(0, 0, UW, UH, 0xffffff).setOrigin(0).setAlpha(0).setDepth(50000);
     this.nextFlash = this.time.now + 6000;
 
     Audio.play('title');
@@ -114,9 +127,9 @@ export class TitleScene extends Phaser.Scene {
 
     const hasSave = await SaveSystem.any();
     const desktop = !!window.desktop;
-    const win = new Win(this, 112, 128, 96, 74);
+    const win = new Win(this, Math.round(UW / 2 - 50), 104, 100, 70);
     this.menu = new MenuList(this, win, {
-      x: 24, y: 9, width: 70, rowH: 14,
+      x: 14, y: 8, width: 80, rowH: 13,
       index: hasSave ? 1 : 0,
       items: [
         { label: 'Novo Jogo', v: 'new' },
@@ -137,7 +150,7 @@ export class TitleScene extends Phaser.Scene {
     for (const b of this.bats ?? []) {
       b.x += b.speed;
       b.y += Math.sin(time / 300 + b.phase) * 0.3;
-      if (b.x > W + 20) b.x = -20;
+      if (b.x > UW + 20) b.x = -20;
     }
     if (this.titleText) this.titleText.setAlpha(0.85 + Math.sin(time / 400) * 0.15);
     if (time > this.nextFlash) {
@@ -169,7 +182,7 @@ export class TitleScene extends Phaser.Scene {
 
   openOptions() {
     this.menu.setActive(false);
-    const win = new Win(this, 50, 110, 220, 100, { depth: 12000 });
+    const win = new Win(this, Math.round(UW / 2 - 110), 70, 220, 100, { depth: 12000 });
     win.text(14, 8, 'Opções', COLORS.yellow);
     const speeds = ['', 'Lenta', 'Normal', 'Rápida', 'Instant.'];
     const rows = [
@@ -179,7 +192,7 @@ export class TitleScene extends Phaser.Scene {
     ];
     const items = () => rows.map((r) => ({ label: r.label, right: `< ${r.get()} >` }));
     const list = new MenuList(this, win, {
-      x: 34, y: 28, width: 180, rowH: 16, items: items(),
+      x: 18, y: 28, width: 190, rowH: 16, items: items(),
       onSelect: () => {},
       onCancel: () => {
         Settings.save();

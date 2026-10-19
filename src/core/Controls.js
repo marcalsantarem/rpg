@@ -1,4 +1,5 @@
-// Entrada unificada: estado calculado uma vez por frame (pressed é idempotente no mesmo frame).
+// Entrada unificada (teclado + toque): estado calculado uma vez por frame (pressed é idempotente no mesmo frame).
+import { VK } from './TouchPad.js';
 const MAP = {
   up: ['UP', 'W'],
   down: ['DOWN', 'S'],
@@ -24,7 +25,9 @@ export class Controls {
     this.now = {};
     this.held = {};
     this.repeatAt = {};
-    this.locked = 0;
+    // botões de toque já pressionados ao abrir a cena não contam como novo toque
+    for (const a of Object.keys(MAP)) this.prev[a] = this.now[a] = !!VK.now[a];
+    this.locked = 2;
     const onReset = () => this.reset();
     scene.events.on('resume', onReset);
     scene.events.on('wake', onReset);
@@ -37,8 +40,9 @@ export class Controls {
   reset() {
     this.scene.input.keyboard.resetKeys();
     for (const a of Object.keys(MAP)) {
-      this.prev[a] = false;
-      this.now[a] = false;
+      this.prev[a] = !!VK.now[a];
+      this.now[a] = !!VK.now[a];
+      VK.tap[a] = false;
     }
     this.locked = 6; // ignora alguns frames após trocar de cena
   }
@@ -51,8 +55,12 @@ export class Controls {
       // JustDown captura toques rápidos (keydown e keyup no mesmo frame)
       let just = false;
       for (const k of this.keys[a]) if (Phaser.Input.Keyboard.JustDown(k)) just = true;
+      if (VK.tap[a]) {
+        just = true;
+        VK.tap[a] = false;
+      }
       this.tapped[a] = just;
-      this.now[a] = this.keys[a].some((k) => k.isDown);
+      this.now[a] = this.keys[a].some((k) => k.isDown) || !!VK.now[a];
       if ((this.now[a] && !this.prev[a]) || just) {
         this.held[a] = t;
         this.repeatAt[a] = t + REPEAT_DELAY;

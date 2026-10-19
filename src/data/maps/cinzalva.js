@@ -99,7 +99,7 @@ export const cinzalva = {
     {
       type: 'npc', id: 'aldeao', x: 20, y: 9, sprite: 'villager', dir: 'left', wander: true,
       script: async (a) => {
-        if (a.flag('boss1')) return a.say('Fazendeiro Ivo', 'Ouvi dizer que vocês derrotaram uma aranha do tamanho de uma carroça! Aldenor está em boas mãos.');
+        if (a.flag('boss1')) return a.say('Fazendeiro Ivo', 'Ouvi dizer que vocês derrotaram uma mulher-serpente na gruta! Aldenor está em boas mãos.');
         await a.say('Fazendeiro Ivo', 'Lobos atacaram minhas ovelhas ontem. Lobos com olhos brilhando em roxo! Isso não é coisa natural.');
       },
     },
@@ -235,8 +235,8 @@ export const capela = {
           return;
         }
         await a.say('Selene', 'O Ancião te contou, não foi? O sino não tocou nesta alvorada. Nem na anterior.');
-        await a.say('Selene', 'Hoje cedo encontrei teias enormes perto do altar, e o cristal estava rachado. Como se algo tivesse roubado a luz dele.');
-        await a.say('Aren', 'Teias... e a Lia sumiu seguindo luzes no bosque. Tudo isso está ligado.');
+        await a.say('Selene', 'Hoje cedo encontrei escamas enormes perto do altar, e o cristal estava rachado. Como se algo tivesse roubado a luz dele.');
+        await a.say('Aren', 'Escamas... e a Lia sumiu seguindo luzes no bosque. Tudo isso está ligado.');
         await a.say('Selene', 'Então vou com você. Alguém precisa cuidar dos seus arranhões, futuro cavaleiro.');
         await a.sfx('item');
         await a.say('Selene', 'Leve isto: a Lanterna da Aurora. Foi acesa com a chama do altar há trezentos anos e nunca se apagou.');
@@ -274,7 +274,7 @@ export const casa_anciao = {
       script: async (a) => {
         if (a.flag('boss2')) return a.say('Ancião Bartolomeu', 'Descansem, meus jovens. Vocês fizeram mais por Aldenor do que qualquer um poderia pedir.');
         if (a.flag('boss1')) {
-          await a.say('Ancião Bartolomeu', 'Um Cristal da Aurora! A Rainha Aranha guardava um fragmento do sino em seu covil...');
+          await a.say('Ancião Bartolomeu', 'Um Cristal da Aurora! A Medusa guardava um fragmento do sino em seu covil...');
           await a.say('Ancião Bartolomeu', 'Se a névoa recuou ao norte, a Floresta Ancestral está aberta. Lia, e talvez outro cristal, estão lá.');
           return;
         }
@@ -305,7 +305,7 @@ export const casa_anciao = {
         await a.say('Tomé', 'Lia! Você voltou! Nunca mais saia sozinha, ouviu?!');
         await a.say('Lia', 'Desculpa, Tomé... As luzinhas eram tão bonitas. Depois eu dormi, e sonhei com uma árvore triste cantando.');
         await a.say('Ancião Bartolomeu', 'Vocês a trouxeram de volta. E com ela, dois Cristais da Aurora.');
-        await a.say('Mirela', 'Não comemorem ainda. A Rainha Aranha e Raizmor eram guardiões antigos, corrompidos pela sombra de Morvath.');
+        await a.say('Mirela', 'Não comemorem ainda. A Medusa e Raizmor eram guardiões antigos, corrompidos pela sombra de Morvath.');
         await a.say('Kael', 'Ótimo. Então tem mais guardiões malvados por aí. Adoro meu trabalho.');
         await a.say('Selene', 'Mirela, você estuda os sinos há anos. O que mais sabe?');
         await a.say('Mirela', 'Que existem quatro sinos, e os outros dois também estão perdendo o brilho. Quando todos se calarem, o selo de Morvath se rompe.');

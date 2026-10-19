@@ -52,8 +52,8 @@ ipcMain.handle('debug:shot', async (e, name) => {
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 960,
-    height: 720,
+    width: 1104,
+    height: 624,
     useContentSize: true,
     backgroundColor: '#000000',
     title: 'Sinos da Aurora',

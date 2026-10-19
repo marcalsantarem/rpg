@@ -1,7 +1,13 @@
-export const W = 320;
-export const H = 240;
-export const TILE = 16;
-export const FONT = 'pix';
+// Resolução interna 16:9 (tiles de 48px do RPG Maker MZ)
+export const W = 1104;
+export const H = 624;
+export const TILE = 48;
+// A interface é desenhada num espaço lógico 3x menor e ampliada por câmera com zoom 3
+export const UI_SCALE = 3;
+export const UW = W / UI_SCALE; // 368
+export const UH = H / UI_SCALE; // 208
+export const FONT = 'MZFont, "M PLUS 1 Code", monospace';
+export const FONT_SIZE = 9;
 
 const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '');
 export const DEBUG = params.has('debug');

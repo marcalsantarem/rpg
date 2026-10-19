@@ -7,9 +7,8 @@ import { HEROES } from '../src/data/heroes.js';
 import { ENEMIES } from '../src/data/enemies.js';
 import { SHOPS } from '../src/data/shops.js';
 import { SONGS } from '../src/data/music.js';
-import { CHARACTERS, validateCharacters } from '../src/art/characters.js';
-import { MONSTER_ART } from '../src/art/monsters.js';
-import { tileExists } from '../src/art/tiles.js';
+import { SPRITES as MZ_SPRITES, mzFiles } from '../src/data/mzAssets.js';
+import { GROUP_LEGEND, mapGroup } from '../src/art/mzTiles.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -18,7 +17,8 @@ const errors = [];
 const warn = [];
 const err = (m) => errors.push(m);
 
-const SPRITES = new Set([...Object.keys(CHARACTERS), 'cat', 'fairy']);
+const SPRITES = new Set(Object.keys(MZ_SPRITES));
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function solidAt(map, x, y) {
   const row = map.rows[y];
@@ -34,14 +34,8 @@ for (const [id, map] of Object.entries(MAPS)) {
     if (r.length !== w) err(`${id}: linha ${y} tem ${r.length} colunas (esperado ${w})`);
     for (const ch of r) if (!LEGEND[ch]) err(`${id}: caractere desconhecido "${ch}" na linha ${y}`);
   });
-  for (const ch of new Set(map.rows.join(''))) {
-    const L = LEGEND[ch];
-    if (!L) continue;
-    for (const k of ['g', 'd', 'top']) {
-      const t = L[k] === '$' ? map.base : L[k];
-      if (t && !tileExists(t)) err(`${id}: tile "${t}" (de "${ch}") não existe`);
-    }
-  }
+  const legend = GROUP_LEGEND[mapGroup(map)];
+  for (const ch of new Set(map.rows.join(''))) if (!legend[ch]) warn.push(`${id}: caractere "${ch}" sem tile do MZ (usa o chão base)`);
   if (!SONGS[map.music]) err(`${id}: música "${map.music}" não existe`);
   if (map.encounters) {
     for (const g of map.encounters.groups) for (const e of g.e) if (!ENEMIES[e]) err(`${id}: inimigo "${e}" não existe`);
@@ -84,7 +78,7 @@ for (const [id, h] of Object.entries(HEROES)) {
   if (!SPRITES.has(h.sprite)) err(`herói ${id}: sprite "${h.sprite}" não existe`);
 }
 for (const [id, e] of Object.entries(ENEMIES)) {
-  if (!MONSTER_ART[e.sprite]) err(`inimigo ${id}: sprite "${e.sprite}" não existe`);
+  if (!e.mz) err(`inimigo ${id}: sem arte do MZ (campo mz)`);
   for (const [s] of e.actions ?? []) if (!SKILLS[s]) err(`inimigo ${id}: ação "${s}" não existe`);
   for (const [it] of e.drops ?? []) if (!ITEMS[it]) err(`inimigo ${id}: drop "${it}" não existe`);
   if (e.steal && !ITEMS[e.steal]) err(`inimigo ${id}: roubo "${e.steal}" não existe`);
@@ -95,7 +89,9 @@ for (const [id, e] of Object.entries(ENEMIES)) {
 }
 for (const [id, s] of Object.entries(SHOPS)) for (const it of s.stock) if (!ITEMS[it]) err(`loja ${id}: item "${it}" não existe`);
 
-for (const e of validateCharacters()) err(`sprite: ${e}`);
+// arquivos do RPG Maker MZ referenciados precisam existir em assets/mz
+for (const f of mzFiles(Object.values(ENEMIES).map((e) => e.mz).filter(Boolean)))
+  if (!fs.existsSync(path.join(ROOT, decodeURIComponent(f.path)))) err(`arquivo do MZ ausente: ${decodeURIComponent(f.path)} (rode npm run import-mz)`);
 for (const w of warn) console.warn('aviso:', w);
 if (errors.length) {
   for (const e of errors) console.error('ERRO:', e);

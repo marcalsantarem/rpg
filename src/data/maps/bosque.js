@@ -9,7 +9,7 @@ export const bosque = {
   banner: true,
   fog: { color: 0xc0d8e0, alpha: 0.1 },
   encounters: {
-    rate: [14, 28],
+    rate: [30, 50],
     bg: 'bg_forest',
     groups: [
       { e: ['lobo'], w: 3 },
@@ -104,7 +104,7 @@ export const bosque = {
         await a.spawn('lumi', 'fairy', 25, 12, 'left', 1);
         await a.wait(400);
         await a.say('???', 'Até que enfim alguém com luz no coração! Ei, aqui! Aqui embaixo... quer dizer, aqui em cima!');
-        await a.say('Lumi', 'Eu sou Lumi, uma fada da aurora. As luzes que levaram a menina eram fogos-fátuos sombrios, enfeitiçados pela Rainha Aranha!');
+        await a.say('Lumi', 'Eu sou Lumi, uma fada da aurora. As luzes que levaram a menina eram fogos-fátuos sombrios, enfeitiçados pela Medusa!');
         await a.say('Aren', 'A Lia! Você sabe onde ela está?');
         await a.say('Lumi', 'Eles a levaram para a Gruta de Cristal, a leste. Ela deixou cair isto. Vou na frente, sigam minha luz!');
         a.give('boneca', 1, true);

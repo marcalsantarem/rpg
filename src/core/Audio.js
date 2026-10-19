@@ -63,6 +63,7 @@ class AudioEngine {
     };
     window.addEventListener('keydown', unlock);
     window.addEventListener('mousedown', unlock);
+    window.addEventListener('touchstart', unlock, { passive: true });
     return true;
   }
 

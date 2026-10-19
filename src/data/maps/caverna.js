@@ -1,14 +1,14 @@
-// Gruta de Cristal: dois andares, Kael preso num casulo e a Rainha Aranha.
+// Gruta de Cristal: dois andares, Kael preso em teias antigas e a Medusa, a Rainha Serpente.
 export const caverna1 = {
   id: 'caverna1',
   name: 'Gruta de Cristal',
   music: 'dungeon',
   base: 'cavefloor',
   banner: true,
-  dark: 0.72,
+  dark: 0.55,
   lightRadius: 70,
   encounters: {
-    rate: [12, 24],
+    rate: [26, 42],
     bg: 'bg_cave',
     groups: [
       { e: ['aranha'], w: 2 },
@@ -69,7 +69,7 @@ export const caverna1 = {
           await a.say(null, 'Teias grossas como cordas de navio fecham a passagem. A espada de treino de Aren só se enrosca nelas.');
           return;
         }
-        await a.say('Kael', 'Deixa comigo. Uma faca de caçador corta qualquer coisa que uma aranha consiga cuspir.');
+        await a.say('Kael', 'Deixa comigo. Uma faca de caçador corta até teia velha de gruta.');
         await a.sfx('slash');
         await a.remove('teia');
         await a.say(null, 'Kael cortou as teias!');
@@ -80,7 +80,7 @@ export const caverna1 = {
       cond: (f) => !f.kael_joined,
       script: async (a) => {
         await a.say(null, 'Um casulo de teia do tamanho de um homem. Algo se mexe lá dentro...');
-        await a.say('???', 'Mmmf! Ei! Se vocês não forem aranhas, me tirem daqui, por favor!');
+        await a.say('???', 'Mmmf! Ei! Se vocês não forem lagartos, me tirem daqui, por favor!');
         const c = await a.ask(null, 'Abrir o casulo?', ['Abrir', 'Deixar']);
         if (c !== 0) return;
         await a.sfx('slash');
@@ -89,7 +89,7 @@ export const caverna1 = {
         if (!won) return;
         await a.remove('casulo');
         await a.spawn('kael_npc', 'kael', 24, 2, 'down');
-        await a.say('Kael', 'Ufa! Kael, patrulheiro. Estou caçando a Rainha Aranha há semanas... e ela me embrulhou como um presente.');
+        await a.say('Kael', 'Ufa! Kael, patrulheiro. Estou caçando a Medusa há semanas... e os lagartos dela me enrolaram nessas teias velhas como um presente.');
         await a.say('Aren', 'Aren, escudeiro de Aldenor. Procuramos uma menina chamada Lia.');
         await a.say('Kael', 'Vi os fogos-fátuos levando uma menina para o fundo da gruta, onde fica o covil da Rainha. Eu vou com vocês. Ela me deve um orgulho ferido.');
         await a.remove('kael_npc');
@@ -120,13 +120,13 @@ export const caverna1 = {
 
 export const caverna2 = {
   id: 'caverna2',
-  name: 'Covil da Rainha Aranha',
+  name: 'Covil da Medusa',
   music: 'dungeon',
   base: 'cavefloor',
-  dark: 0.76,
+  dark: 0.6,
   lightRadius: 70,
   encounters: {
-    rate: [14, 26],
+    rate: [26, 42],
     bg: 'bg_web',
     groups: [
       { e: ['aranha', 'aranha'], w: 3 },
@@ -174,27 +174,27 @@ export const caverna2 = {
         await a.music(null);
         await a.sfx('heart');
         await a.say('???', 'Durma, durma, criancinha... a rainha tece seu sonho mais bonito...');
-        await a.say('Kael', 'É ela, a Rainha Aranha. Cuidado com as presas, e não escutem a canção dela!');
-        await a.say('Rainha Aranha', 'Visitantes... e um deles carrega a Marca do Sol. Que irritante. A luz machuca meus olhinhos.');
-        await a.say('Rainha Aranha', 'O Mestre das Sombras me prometeu a gruta inteira, se eu guardasse este cristal longe da alvorada.');
+        await a.say('Kael', 'É ela, a Medusa, a Rainha Serpente. Não olhem direto nos olhos dela!');
+        await a.say('Medusa', 'Visitantes... e um deles carrega a Marca do Sol. Que irritante. A luz fere meus olhos.');
+        await a.say('Medusa', 'O Mestre das Sombras me prometeu a gruta inteira, se eu guardasse este cristal longe da alvorada.');
         await a.say('Aren', 'Onde está a Lia?!');
-        await a.say('Rainha Aranha', 'A menina? Mandei para o velho Raizmor, na floresta. Agora venham... minhas teias estão famintas!');
+        await a.say('Medusa', 'A menina? Mandei para o velho Raizmor, na floresta. Agora venham... olhem para mim!');
         const won = await a.battle(['tecela'], { boss: true, bg: 'bg_web', music: 'boss' });
         if (!won) return;
         a.set('boss1');
         await a.remove('tecela');
         await a.sfx('bell');
         await a.flash(0xffffff, 400);
-        await a.say(null, 'A Rainha Aranha encolhe até virar uma aranhinha comum e foge por uma fresta. No chão, um cristal brilha como o sol nascente.');
+        await a.say(null, 'A Medusa solta um grito e se desfaz em areia e escamas. No chão, um cristal brilha como o sol nascente.');
         a.give('fragmento1', 1, true);
         await a.sfx('item');
         await a.say(null, 'Obteve o Cristal da Aurora I!');
         await a.say('Selene', 'Um fragmento dos Sinos de Cristal! Foi isso que roubaram do sino do templo?');
         await a.spawn('lumi', 'fairy', 12, 3, 'down', 1);
-        await a.say('Lumi', 'Vocês conseguiram! A sombra que corrompia a Rainha se foi. Ela volta a ser só uma aranha mal-humorada.');
+        await a.say('Lumi', 'Vocês conseguiram! A sombra que corrompia a Rainha se foi. Ela volta a dormir no fundo da gruta, como nos velhos tempos.');
         await a.say('Lumi', 'Mas a menina está na Floresta Ancestral, presa num sono encantado. A névoa púrpura vai ceder diante deste cristal!');
         await a.remove('lumi');
-        await a.say('Kael', 'A Floresta Ancestral... dizem que uma bruxa vive lá. Bom, depois de uma aranha gigante, o que é uma bruxa?');
+        await a.say('Kael', 'A Floresta Ancestral... dizem que uma bruxa vive lá. Bom, depois de uma mulher-serpente, o que é uma bruxa?');
         await a.say('Aren', 'Vamos voltar ao bosque. Aguente firme, Lia.');
         await a.music('dungeon');
       },

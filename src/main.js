@@ -2,14 +2,29 @@ import { W, H, DEBUG } from './config.js';
 import { BootScene } from './scenes/BootScene.js';
 import { ArtTestScene } from './scenes/ArtTestScene.js';
 import { MapScene } from './scenes/MapScene.js';
+import { HudScene } from './scenes/HudScene.js';
 import { BattleScene } from './scenes/BattleScene.js';
 import { MenuScene } from './scenes/MenuScene.js';
 import { ShopScene } from './scenes/ShopScene.js';
 import { SaveLoadScene } from './scenes/SaveLoadScene.js';
 import { TitleScene } from './scenes/TitleScene.js';
 import { IntroScene, GameOverScene, EndChapterScene } from './scenes/StoryScenes.js';
+import { setupTouchPad } from './core/TouchPad.js';
 
-const scenes = [BootScene, TitleScene, IntroScene, MapScene, BattleScene, MenuScene, ShopScene, SaveLoadScene, GameOverScene, EndChapterScene, ArtTestScene];
+const scenes = [BootScene, TitleScene, IntroScene, MapScene, HudScene, BattleScene, MenuScene, ShopScene, SaveLoadScene, GameOverScene, EndChapterScene, ArtTestScene];
+
+// Fonte do RPG Maker MZ (M+ 1m) — precisa estar carregada antes de medir/criar textos
+async function loadFont() {
+  try {
+    const face = new FontFace('MZFont', 'url(assets/mz/fonts/mplus-1m-regular.woff)');
+    await face.load();
+    document.fonts.add(face);
+  } catch (e) {
+    console.warn('Fonte do MZ indisponível, usando monospace', e);
+  }
+}
+await loadFont();
+setupTouchPad();
 
 const game = new Phaser.Game({
   type: Phaser.WEBGL,

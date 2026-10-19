@@ -1,9 +1,9 @@
 // Loja: comprar e vender itens/equipamentos.
-import { W, H, COLORS } from '../config.js';
+import { UW, UH, COLORS } from '../config.js';
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { State, heroStats, itemCount, addItem, removeItem } from '../core/GameState.js';
-import { Win, MenuList } from '../ui/UI.js';
+import { Win, MenuList, uiCamera } from '../ui/UI.js';
 import { SHOPS } from '../data/shops.js';
 import { ITEMS, canEquip } from '../data/items.js';
 import { HEROES } from '../data/heroes.js';
@@ -21,22 +21,23 @@ export class ShopScene extends Phaser.Scene {
 
   create() {
     this.controls = new Controls(this);
+    uiCamera(this);
     const shop = SHOPS[this.opts.shopId];
     this.shop = shop;
-    this.topWin = new Win(this, 0, 0, W, 38);
+    this.topWin = new Win(this, 0, 0, UW, 36);
     this.topWin.text(10, 6, shop.name, COLORS.yellow);
     this.msgText = this.topWin.text(10, 20, shop.greeting, COLORS.gray);
-    this.cmdWin = new Win(this, 0, 38, 96, 56);
-    this.goldWin = new Win(this, 0, 94, 96, 30);
-    this.goldWin.text(8, 8, 'Moedas', COLORS.gray);
-    this.goldText = this.goldWin.textRight(88, 8, `${State.g.gold}`);
-    this.infoWin = new Win(this, 0, 124, 96, 116);
-    this.listWin = new Win(this, 96, 38, 224, 202);
+    this.cmdWin = new Win(this, 0, 36, 104, 50);
+    this.goldWin = new Win(this, 0, 86, 104, 26);
+    this.goldWin.text(8, 7, 'Moedas', COLORS.gray);
+    this.goldText = this.goldWin.textRight(96, 7, `${State.g.gold}`);
+    this.infoWin = new Win(this, 0, 112, 104, 96);
+    this.listWin = new Win(this, 104, 36, 264, 172);
     this.infoTexts = [];
     this.sub = null;
     this.qty = null;
     this.cmd = new MenuList(this, this.cmdWin, {
-      x: 22, y: 7, width: 70, rowH: 14,
+      x: 12, y: 6, width: 86, rowH: 13,
       items: [{ label: 'Comprar' }, { label: 'Vender' }, { label: 'Sair' }],
       onSelect: (_it, i) => {
         if (i === 0) this.openBuy();
@@ -61,7 +62,7 @@ export class ShopScene extends Phaser.Scene {
 
   refreshGold() {
     this.goldText.setText(`${State.g.gold}`);
-    this.goldText.setX(88 - this.goldText.width);
+    this.goldText.setX(96 - this.goldText.width);
   }
 
   showInfo(id) {
@@ -73,7 +74,7 @@ export class ShopScene extends Phaser.Scene {
     add(8, 6, `Tem: ${itemCount(id)}`, COLORS.gray);
     if (['weapon', 'armor', 'accessory'].includes(it.type)) {
       State.g.party.forEach((h, i) => {
-        const y = 22 + i * 22;
+        const y = 20 + i * 18;
         const ok = canEquip(it, h.id);
         add(8, y, HEROES[h.id].name, ok ? COLORS.white : COLORS.dim);
         if (!ok) return;
@@ -82,8 +83,8 @@ export class ShopScene extends Phaser.Scene {
         const key = it.type === 'weapon' ? 'atk' : it.type === 'armor' ? 'def' : Object.keys(it.stats ?? { res: 0 })[0] === 'hp' ? 'maxHp' : Object.keys(it.stats ?? { res: 0 })[0];
         const d = (nxt[key] ?? 0) - (cur[key] ?? 0);
         const label = { atk: 'For', def: 'Def', res: 'Res', agi: 'Agi', luck: 'Sor', maxHp: 'HP', mag: 'Mag' }[key] ?? key;
-        add(16, y + 10, `${label} ${d > 0 ? '+' : ''}${d}`, d > 0 ? COLORS.green : d < 0 ? COLORS.red : COLORS.gray);
-        if (h.equip[it.type] === id) add(70, y, 'E', COLORS.yellow);
+        add(54, y, `${label} ${d > 0 ? '+' : ''}${d}`, d > 0 ? COLORS.green : d < 0 ? COLORS.red : COLORS.gray);
+        if (h.equip[it.type] === id) add(94, y, 'E', COLORS.yellow);
       });
     }
   }
@@ -97,7 +98,7 @@ export class ShopScene extends Phaser.Scene {
     const items = () =>
       this.shop.stock.map((id) => ({ label: ITEMS[id].name, right: ITEMS[id].price, id, enabled: State.g.gold >= ITEMS[id].price }));
     const list = new MenuList(this, this.listWin, {
-      x: 20, y: 8, width: 200, rowH: 13, visibleRows: 14, items: items(),
+      x: 12, y: 7, width: 246, rowH: 13, visibleRows: 12, items: items(),
       onChange: (it) => {
         this.showInfo(it.id);
         this.setMsg(ITEMS[it.id].desc);
@@ -157,7 +158,7 @@ export class ShopScene extends Phaser.Scene {
       return;
     }
     const list = new MenuList(this, this.listWin, {
-      x: 20, y: 8, width: 200, rowH: 13, visibleRows: 14, items: first,
+      x: 12, y: 7, width: 246, rowH: 13, visibleRows: 12, items: first,
       onChange: (it) => {
         this.showInfo(it.id);
         this.setMsg(`Pago ${sellPrice(ITEMS[it.id])} por unidade.`);
@@ -187,7 +188,7 @@ export class ShopScene extends Phaser.Scene {
   }
 
   askQty(item, max, unit, cb) {
-    const win = new Win(this, 110, 96, 196, 52, { depth: 12000 });
+    const win = new Win(this, 140, 80, 200, 50, { depth: 12000 });
     win.text(10, 8, item.name, COLORS.yellow);
     let n = 1;
     const t = win.text(10, 26, '');
