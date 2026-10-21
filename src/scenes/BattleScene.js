@@ -1,9 +1,10 @@
 // Combate por turnos: inimigos à esquerda, grupo à direita, ordem por agilidade.
 import { UW, UH, COLORS } from '../config.js';
-import { BATTLERS, BATTLEBACKS, MOTIONS } from '../data/mzAssets.js';
 
 const FIELD_H = UH - 72; // altura do campo de batalha (acima das janelas)
-const LOOP_MOTIONS = new Set(['walk', 'wait', 'chant', 'guard', 'dying', 'abnormal', 'sleep', 'dead', 'victory', 'escape']);
+const LOOP_MOTIONS = new Set(['walk', 'wait', 'guard', 'dying', 'abnormal', 'sleep', 'dead', 'victory', 'escape']);
+// quadros da folha: 0-2 frente, 3-5 esquerda, 6-8 direita, 9-11 costas
+const POSES = { walk: [4, 3, 5, 3], wait: [3], guard: [3], dying: [3], abnormal: [3], sleep: [3], damage: [3], victory: [0, 0, 1, 0, 0, 2], escape: [7, 6, 8, 6], action: [4, 5, 4] };
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { State, heroStats, heroSkills, heroProtects, gainExp, addItem, removeItem, itemCount } from '../core/GameState.js';
@@ -38,7 +39,7 @@ export class BattleScene extends Phaser.Scene {
     this.addBattleback(this.opts.bg || 'bg_forest');
     this.add.rectangle(0, FIELD_H, UW, UH - FIELD_H, 0x000000).setOrigin(0);
     this.createCombatants();
-    // animação contínua dos battlers (padrão 0-1-2-1 do MZ)
+    // animação contínua dos heróis (passos, ações)
     this.time.addEvent({ delay: 170, loop: true, callback: () => this.tickMotions() });
     this.createWindows();
     Audio.play(this.opts.music || 'battle', { restart: true });
@@ -51,9 +52,9 @@ export class BattleScene extends Phaser.Scene {
     const party = State.g.party;
     this.heroes = party.map((h, i) => {
       const s = heroStats(h);
-      const x = 292 + i * 10;
-      const y = 58 + i * 20;
-      const sprite = this.add.sprite(x, y, `mz_sv_actors_${BATTLERS[h.id]}`, 0).setOrigin(0.5, 1).setScale(1 / 3).setDepth(10 + i);
+      const x = 300 + i * 8;
+      const y = 54 + i * 22;
+      const sprite = this.add.sprite(x, y, `chr_${HEROES[h.id].sprite}`, 3).setOrigin(0.5, 1).setDepth(10 + i);
       const c = {
         isHero: true, ref: h, id: h.id, name: HEROES[h.id].name,
         hp: h.hp, mp: h.mp, maxHp: s.maxHp, maxMp: s.maxMp,
@@ -74,13 +75,8 @@ export class BattleScene extends Phaser.Scene {
       counts[id] = (counts[id] ?? 0) + 1;
       const same = ids.filter((x) => x === id).length > 1;
       const [x, y] = pos[i];
-      const key = `mz_enemies_${d.mz}`;
-      const src = this.textures.get(key).getSourceImage();
-      const maxH = d.boss ? 118 : 72;
-      const maxW = d.boss ? 170 : 110;
-      const sc = Math.min(1 / 3, maxH / src.height, maxW / src.width);
-      const sprite = this.add.image(x, y, key).setOrigin(0.5, 1).setScale(sc).setDepth(5 + y / 100);
-      const alpha = 1;
+      const sprite = this.add.image(x, y, `mon_${d.sprite}`).setOrigin(0.5, 1).setDepth(5 + y / 100);
+      const alpha = { shadow: 0.85 }[d.sprite] ?? 1;
       sprite.setAlpha(alpha);
       return {
         isHero: false, def0: d, id, name: same ? `${d.name} ${String.fromCharCode(64 + counts[id])}` : d.name,
@@ -99,23 +95,12 @@ export class BattleScene extends Phaser.Scene {
     return ids.map((_, i) => [50 + (i % 2) * 90 + Math.floor(i / 2) * 24, 100 + Math.floor(i / 2) * 24 + (i % 2) * 8]);
   }
 
-  // Fundo de batalha do MZ (chão + paredes), cobrindo a tela
+  // Fundo de batalha (arte procedural 368x160; a parte de baixo fica sob as janelas)
   addBattleback(key) {
-    const pair = BATTLEBACKS[key];
-    if (!pair) {
-      this.add.image(0, 0, key).setOrigin(0).setScale(UW / 320);
-      return;
-    }
-    pair.forEach((name, i) => {
-      const k = `mz_battlebacks${i + 1}_${name}`;
-      if (!this.textures.exists(k)) return;
-      const img = this.textures.get(k).getSourceImage();
-      const sc = Math.max(UW / img.width, UH / img.height);
-      this.add.image(UW / 2, UH / 2 - 14, k).setScale(sc);
-    });
+    this.add.image(0, -12, key).setOrigin(0);
   }
 
-  // ------------------------------------------------------------ battlers (motions do MZ)
+  // ------------------------------------------------------------ poses dos heróis (folha 3x4 do personagem)
   baseMotion(c) {
     if (c.hp <= 0) return 'dead';
     if (c.status.has('sono')) return 'sleep';
@@ -133,16 +118,15 @@ export class BattleScene extends Phaser.Scene {
   }
 
   applyMotionFrame(c) {
-    const m = MOTIONS[c.motion] ?? 1;
-    const seq = LOOP_MOTIONS.has(c.motion) ? [0, 1, 2, 1] : [0, 1, 2, 2];
-    const p = c.motion === 'dead' ? 2 : seq[c.pattern % 4];
-    c.sprite.setFrame((m % 6) * 9 + Math.floor(m / 6) * 3 + p);
+    if (c.motion === 'dead') return;
+    const seq = POSES[c.motion] ?? POSES.action;
+    c.sprite.setFrame(seq[c.pattern % seq.length]);
   }
 
   tickMotions() {
     for (const h of this.heroes ?? []) {
       h.pattern++;
-      if (!LOOP_MOTIONS.has(h.motion) && h.pattern >= 4) {
+      if (!LOOP_MOTIONS.has(h.motion) && h.pattern >= 3) {
         h.motion = this.baseMotion(h);
         h.pattern = 0;
       }
@@ -325,7 +309,7 @@ export class BattleScene extends Phaser.Scene {
       this.ui = null;
     };
     const list = new MenuList(this, win, {
-      x: 12, y: 5, width: 120, rowH: 12.5, items,
+      x: 20, y: 5, width: 120, rowH: 12.5, items,
       onSelect: (it) => {
         if (it.v === 'attack') {
           list.setActive(false);
@@ -391,7 +375,7 @@ export class BattleScene extends Phaser.Scene {
       } else this.hideBanner();
     };
     const list = new MenuList(this, win, {
-      x: 12, y: 6, width: UW - 20, cols: 2, colW: 174, rowH: 12, visibleRows: 5, items: entries,
+      x: 20, y: 6, width: UW - 20, cols: 2, colW: 174, rowH: 12, visibleRows: 5, items: entries,
       onChange: showDesc,
       onSelect: (it) => {
         list.setActive(false);
@@ -852,12 +836,12 @@ export class BattleScene extends Phaser.Scene {
   }
 
   koPose(h) {
-    h.sprite.setPosition(h.homeX, h.homeY);
-    this.setMotion(h, 'dead');
+    h.motion = 'dead';
+    h.sprite.setFrame(0).setAngle(-90).setTint(0x9090a0).setOrigin(0.5, 0.5).setPosition(h.homeX, h.homeY - 6);
   }
 
   revivePose(h) {
-    h.sprite.clearTint().setPosition(h.homeX, h.homeY);
+    h.sprite.setAngle(0).clearTint().setOrigin(0.5, 1).setPosition(h.homeX, h.homeY);
     this.setMotion(h, 'wait');
   }
 
@@ -1034,6 +1018,7 @@ export class BattleScene extends Phaser.Scene {
     Audio.play('victory', { restart: true });
     for (const h of this.alive(this.heroes)) {
       this.setMotion(h, 'victory');
+      this.tweens.add({ targets: h.sprite, y: h.homeY - 6, duration: 160, yoyo: true, repeat: 3, delay: Math.random() * 200 });
     }
     const exp = this.enemies.reduce((a, e) => a + e.def0.exp, 0);
     const gold = this.enemies.reduce((a, e) => a + e.def0.gold, 0);
@@ -1088,7 +1073,6 @@ export class BattleScene extends Phaser.Scene {
       Audio.sfx('run');
       for (const h of this.alive(this.heroes)) {
         this.setMotion(h, 'escape');
-        h.sprite.setFlipX(true);
         this.tweens.add({ targets: h.sprite, x: h.homeX + 80, duration: 500 });
       }
       await this.banner('Fugiram!', 700);

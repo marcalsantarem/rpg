@@ -108,7 +108,7 @@ export class GameOverScene extends Phaser.Scene {
     const has = await SaveSystem.any();
     const win = new Win(this, Math.round(UW / 2 - 60), 120, 120, 44);
     this.menu = new MenuList(this, win, {
-      x: 14, y: 8, width: 100, rowH: 14,
+      x: 20, y: 8, width: 100, rowH: 14,
       index: has ? 0 : 1,
       items: [
         { label: 'Carregar', enabled: has },
@@ -184,7 +184,7 @@ export class EndChapterScene extends Phaser.Scene {
     win.text(10, 7, 'Salvar progresso?', COLORS.white);
     const opt = new Win(this, Math.round(UW / 2 + 44), 168, 70, 38);
     this.menu = new MenuList(this, opt, {
-      x: 12, y: 6, width: 52, rowH: 13,
+      x: 20, y: 6, width: 52, rowH: 13,
       items: [{ label: 'Sim' }, { label: 'Não' }],
       onSelect: (_it, i) => {
         if (i === 0) {

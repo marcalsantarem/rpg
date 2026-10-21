@@ -3,7 +3,6 @@ import { wrapText, textWidth } from '../core/Font.js';
 import { Settings } from '../core/Settings.js';
 import { COLORS, UW, UH } from '../config.js';
 import { HEROES } from '../data/heroes.js';
-import { FACES } from '../data/mzAssets.js';
 
 const BOX_H = 62;
 const BOX_Y = UH - BOX_H - 4;
@@ -54,15 +53,14 @@ export class MessageBox {
     this.nameWin.text(8, 4, name, COLORS.yellow);
   }
 
-  // Rosto do herói (folha de faces do MZ) quando ele é quem fala
+  // Rosto do herói (retrato em pixel art) quando ele é quem fala
   setFace(name) {
     if (this.face) this.face.destroy();
     this.face = null;
     const id = FACE_NAMES[name];
-    const f = id && FACES[id];
-    const key = f && `face_${id}`;
+    const key = id && `face_${id}`;
     if (key && this.scene.textures.exists(key)) {
-      this.face = this.scene.add.image(7, 7, key).setOrigin(0).setScale(1 / 3);
+      this.face = this.scene.add.image(7, 7, key).setOrigin(0).setScale(3);
       this.win.add(this.face);
     }
     this.body.setX(this.face ? 62 : 10);
@@ -115,7 +113,7 @@ export class MessageBox {
         resolve(i);
       };
       this.list = new MenuList(this.scene, this.choiceWin, {
-        x: 12, y: 7, width: w - 20,
+        x: 20, y: 7, width: w - 20,
         items: options.map((o) => ({ label: o })),
         onSelect: (_it, i) => finish(i),
         onCancel: opts.noCancel ? null : () => finish(options.length - 1),

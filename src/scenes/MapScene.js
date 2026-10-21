@@ -8,15 +8,16 @@ import { Win } from '../ui/UI.js';
 import { textWidth } from '../core/Font.js';
 import { MAPS } from '../data/maps/index.js';
 import { LEGEND } from '../data/maps/legend.js';
-import { hash2 } from '../art/tiles.js';
-import { buildMzMap, tileTexture, B as TB, C as TC } from '../art/mzTiles.js';
+import { TILE_INDEX, VARIANTS, AUTOS, OBJ_VARIANTS, SCATTER, AUTO_FILL_VARIANTS, hash2 } from '../art/tiles.js';
 import { UW } from '../config.js';
 import { ITEMS } from '../data/items.js';
 
 const OPP = { up: 'down', down: 'up', left: 'right', right: 'left' };
 const PATH_DIR = { U: 'up', D: 'down', L: 'left', R: 'right' };
 const DEPTH_OVER = 3000;
-const SHIFT_Y = 6;
+// a arte é desenhada em 16px e ampliada 3x no mapa
+const PX = 3;
+const SHIFT_Y = 0;
 
 export class MapScene extends Phaser.Scene {
   constructor() {
@@ -77,24 +78,55 @@ export class MapScene extends Phaser.Scene {
     const rows = def.rows;
     this.mapH = rows.length;
     this.mapW = rows[0].length;
-    // tileset composto com os gráficos do RPG Maker MZ
-    const mz = buildMzMap(this, def, hash2);
     this.tilemap = this.make.tilemap({ tileWidth: TILE, tileHeight: TILE, width: this.mapW, height: this.mapH });
-    const ts = this.tilemap.addTilesetImage(mz.texture, mz.texture, TILE, TILE, 0, 0);
+    const ts = this.tilemap.addTilesetImage('tiles48', 'tiles48', TILE, TILE, 0, 0);
     this.ground = this.tilemap.createBlankLayer('ground', ts).setDepth(0);
     this.deco = this.tilemap.createBlankLayer('deco', ts).setDepth(1);
     this.over = this.tilemap.createBlankLayer('over', ts).setDepth(DEPTH_OVER);
-    this.ground.putTilesAt(mz.ground, 0, 0);
-    this.deco.putTilesAt(mz.deco, 0, 0);
-    this.over.putTilesAt(mz.over, 0, 0);
-    this.animTiles = mz.anim;
     this.solid = [];
     this.counter = [];
+    this.animTiles = [];
+    const at = (x, y) => (x < 0 || y < 0 || x >= this.mapW || y >= this.mapH ? null : LEGEND[rows[y][x]] ?? LEGEND['.']);
+    const resolve = (name, x, y, L) => {
+      if (name === '$') name = def.base;
+      if (L && L.auto && L.g === name) {
+        const same = (xx, yy) => {
+          const n = at(xx, yy);
+          return n === null || n.ag === L.ag;
+        };
+        let m = (same(x, y - 1) ? 1 : 0) | (same(x + 1, y) ? 2 : 0) | (same(x, y + 1) ? 4 : 0) | (same(x - 1, y) ? 8 : 0);
+        if (AUTOS[name].bits === 'EW') m &= 10;
+        if (m === 15 && AUTO_FILL_VARIANTS[name]) {
+          const v = hash2(x, y) % (AUTO_FILL_VARIANTS[name] + 1);
+          if (v) return `${name}@15#${v}`;
+        }
+        return AUTOS[name].frames > 1 ? [0, 1].map((f) => `${name}@${m}@${f}`) : `${name}@${m}`;
+      }
+      if (VARIANTS[name]) return `${name}#${hash2(x, y) % VARIANTS[name]}`;
+      const ov = OBJ_VARIANTS[name];
+      if (ov) return ov[hash2(x, y) % ov.length];
+      return name;
+    };
+    const idx = (name) => TILE_INDEX[name] ?? 0;
     for (let y = 0; y < this.mapH; y++) {
       this.solid.push([]);
       this.counter.push([]);
       for (let x = 0; x < this.mapW; x++) {
-        const L = LEGEND[rows[y][x]] ?? LEGEND['.'];
+        const L = at(x, y);
+        const g = resolve(L.g, x, y, L);
+        if (Array.isArray(g)) {
+          this.ground.putTileAt(idx(g[0]), x, y);
+          this.animTiles.push({ x, y, frames: g.map(idx) });
+        } else this.ground.putTileAt(idx(g), x, y);
+        if (L.d) this.deco.putTileAt(idx(resolve(L.d, x, y)), x, y);
+        else if (L.scatter && SCATTER[L.scatter] && hash2(x * 7 + 3, y * 13 + 1) % 100 < 16) {
+          const opts = SCATTER[L.scatter];
+          this.deco.putTileAt(idx(opts[hash2(x + 11, y + 5) % opts.length]), x, y);
+        }
+        if (L.top && y > 0) {
+          const top = OBJ_VARIANTS[L.top] ? OBJ_VARIANTS[L.top][hash2(x, y) % OBJ_VARIANTS[L.top].length] : L.top;
+          this.over.putTileAt(idx(top), x, y - 1);
+        }
         this.solid[y].push(!!L.solid);
         this.counter[y].push(!!L.counter);
       }
@@ -102,7 +134,7 @@ export class MapScene extends Phaser.Scene {
     if (this.animTiles.length) {
       let f = 0;
       this.time.addEvent({
-        delay: 380,
+        delay: 550,
         loop: true,
         callback: () => {
           f++;
@@ -175,23 +207,14 @@ export class MapScene extends Phaser.Scene {
     this.events.once('shutdown', () => win.destroy());
   }
 
-  // Texturas de objetos de evento: tiles do MZ, imagens de inimigos (chefes no mapa) ou arte procedural ampliada
+  // Texturas de objetos de evento (arte em 16px, ampliada no mapa)
   objTexture(name) {
-    const MAP = {
-      obj_web: () => tileTexture(this, 'tile_web', TB('Dungeon', 8, 6)),
-      obj_cocoon: () => tileTexture(this, 'tile_web', TB('Dungeon', 8, 6)),
-      obj_bramble: () => tileTexture(this, 'tile_bramble', TB('Outside', 9, 14)),
-      obj_pack: () => tileTexture(this, 'tile_pack', TC('Inside', 1, 12)),
-    };
-    if (MAP[name]) return { key: MAP[name](), scale: 1 };
-    const boss = { mon_weaver: 'Medusa', mon_tree: 'Treant' }[name];
-    if (boss) return { key: `mz_enemies_${boss}`, scale: 0.6 };
-    return { key: name, scale: this.textures.get(name).getSourceImage().width <= 16 ? 3 : 1 };
+    return { key: name, scale: PX };
   }
 
   // ---------------------------------------------------------------- atores
   makeActor(spriteId, x, y, dir = 'down', alpha = 1) {
-    const sprite = this.add.sprite(x * TILE + TILE / 2, y * TILE + TILE - SHIFT_Y, `chr_${spriteId}`, DIRS[dir].frame * 3).setOrigin(0.5, 1);
+    const sprite = this.add.sprite(x * TILE + TILE / 2, y * TILE + TILE - SHIFT_Y, `chr_${spriteId}`, DIRS[dir].frame * 3).setOrigin(0.5, 1).setScale(PX);
     sprite.setAlpha(alpha);
     const a = { sprite, x, y, dir, moving: false, parity: 0 };
     this.setDepth(a);
@@ -299,15 +322,15 @@ export class MapScene extends Phaser.Scene {
         case 'chest': {
           if (ev.cond && !ev.cond(f)) break;
           const opened = flag(`chest:${this.def.id}:${ev.id}`);
-          const sprite = this.add.sprite(ev.x * TILE + TILE / 2, ev.y * TILE + TILE, 'chest', opened ? 1 : 0).setOrigin(0.5, 1);
+          const sprite = this.add.sprite(ev.x * TILE + TILE / 2, ev.y * TILE + TILE, 'chest', opened ? 1 : 0).setOrigin(0.5, 1).setScale(PX);
           const a = { sprite, ev, id: ev.id, kind: 'chest', x: ev.x, y: ev.y, solid: true, static: true };
           this.setDepth(a);
           this.entities.push(a);
           break;
         }
         case 'save': {
-          const sprite = this.add.sprite(ev.x * TILE + TILE / 2, ev.y * TILE + TILE, 'altar', 0).setOrigin(0.5, 1);
-          this.time.addEvent({ delay: 160, loop: true, callback: () => sprite.setFrame((sprite.frame.name + 1) % 6) });
+          const sprite = this.add.sprite(ev.x * TILE + TILE / 2, ev.y * TILE + TILE, 'altar', 0).setOrigin(0.5, 1).setScale(PX);
+          this.time.addEvent({ delay: 220, loop: true, callback: () => sprite.setFrame(sprite.frame.name === 0 ? 1 : 0) });
           const a = { sprite, ev, kind: 'save', x: ev.x, y: ev.y, solid: true, static: true };
           this.setDepth(a);
           this.entities.push(a);

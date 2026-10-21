@@ -1,31 +1,28 @@
 import { createPixelFont } from '../core/Font.js';
+import { buildTileset } from '../art/tiles.js';
+import { buildAllCharacters, CHARACTERS } from '../art/characters.js';
+import { buildMonsters } from '../art/monsters.js';
 import { buildMisc } from '../art/misc.js';
 import { newGame, State, joinParty } from '../core/GameState.js';
 import { MAPS } from '../data/maps/index.js';
-import { ENEMIES } from '../data/enemies.js';
-import { W, H } from '../config.js';
-import { mzFiles, SPRITES, FACES, OBJECT_SHEETS } from '../data/mzAssets.js';
+import { TILE } from '../config.js';
 import { makeCanvas, addSheet, addTexture } from '../core/Pixel.js';
 
-// Tamanho do quadro de uma folha de personagem do MZ ($ = folha de um só personagem)
-export function charFrameSize(sheetName, img) {
-  const single = /^[!]?\$/.test(sheetName);
-  return single ? [img.width / 3, img.height / 4] : [img.width / 12, img.height / 8];
+// Amplia uma textura em pixel art (vizinho mais próximo) e registra como spritesheet
+function upscaleSheet(scene, src, dst, k, fw, fh) {
+  const img = scene.textures.get(src).getSourceImage();
+  const { canvas, ctx } = makeCanvas(img.width * k, img.height * k);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(img, 0, 0, img.width * k, img.height * k);
+  addSheet(scene, dst, canvas, fw, fh);
 }
 
-// Recorta o bloco de um personagem (3 quadros x 4 direções) reordenando para o padrão do jogo:
-// quadro 0 = parado (coluna do meio no MZ), 1 e 2 = passos.
-function buildCharSheet(scene, key, sheetName, index) {
-  const img = scene.textures.get(`mz_characters_${sheetName}`).getSourceImage();
-  const [fw, fh] = charFrameSize(sheetName, img);
-  const single = /^[!]?\$/.test(sheetName);
-  const bx = single ? 0 : (index % 4) * fw * 3;
-  const by = single ? 0 : Math.floor(index / 4) * fh * 4;
-  const { canvas, ctx } = makeCanvas(fw * 3, fh * 4);
-  const order = [1, 0, 2];
-  for (let dir = 0; dir < 4; dir++)
-    for (let f = 0; f < 3; f++) ctx.drawImage(img, bx + order[f] * fw, by + dir * fh, fw, fh, f * fw, dir * fh, fw, fh);
-  addSheet(scene, key, canvas, fw, fh);
+// Retrato 16x16: cabeça e ombros do quadro "parado, de frente" do personagem
+function buildFace(scene, id) {
+  const img = scene.textures.get(`chr_${id}`).getSourceImage();
+  const { canvas, ctx } = makeCanvas(16, 16);
+  ctx.drawImage(img, 0, 2, 16, 16, 0, 0, 16, 16);
+  addTexture(scene, `face_${id}`, canvas);
 }
 
 export class BootScene extends Phaser.Scene {
@@ -33,27 +30,18 @@ export class BootScene extends Phaser.Scene {
     super('Boot');
   }
 
-  preload() {
-    const g = this.add.graphics();
-    this.load.on('progress', (p) => {
-      g.clear();
-      g.fillStyle(0x2a2440).fillRect(W / 2 - 200, H / 2 - 6, 400, 12);
-      g.fillStyle(0xe8c050).fillRect(W / 2 - 198, H / 2 - 4, 396 * p, 8);
-    });
-    const enemyArt = Object.values(ENEMIES).map((e) => e.mz).filter(Boolean);
-    for (const f of mzFiles(enemyArt)) {
-      if (f.dir === 'sv_actors') this.load.spritesheet(f.key, f.path, { frameWidth: 64, frameHeight: 64 });
-      else this.load.image(f.key, f.path);
-    }
-  }
-
   create() {
     createPixelFont(this, 'pix');
+    buildTileset(this);
+    upscaleSheet(this, 'tiles', 'tiles48', TILE / 16, TILE, TILE);
+    buildAllCharacters(this);
+    for (const id of Object.keys(CHARACTERS)) buildFace(this, id);
+    buildMonsters(this);
     buildMisc(this);
-    this.buildMzTextures();
     this.scene.launch('Hud');
     const params = new URLSearchParams(location.search);
-    if (params.has('map') && MAPS[params.get('map')]) {
+    if (params.has('art')) this.scene.start('ArtTest');
+    else if (params.has('map') && MAPS[params.get('map')]) {
       // atalho de teste: ?map=id&x=&y=&party=selene,kael&flags=a,b
       newGame();
       for (const id of (params.get('party') || '').split(',').filter(Boolean)) joinParty(id);
@@ -67,40 +55,5 @@ export class BootScene extends Phaser.Scene {
         dir: warp?.dir ?? 'down',
       });
     } else this.scene.start('Title');
-  }
-
-  buildMzTextures() {
-    // personagens de campo
-    for (const [id, [sheet, index]] of Object.entries(SPRITES)) buildCharSheet(this, `chr_${id}`, sheet, index);
-    // rostos 144x144
-    for (const [id, [sheet, index]] of Object.entries(FACES)) {
-      const img = this.textures.get(`mz_faces_${sheet}`).getSourceImage();
-      const { canvas, ctx } = makeCanvas(144, 144);
-      ctx.drawImage(img, (index % 4) * 144, Math.floor(index / 4) * 144, 144, 144, 0, 0, 144, 144);
-      addTexture(this, `face_${id}`, canvas);
-    }
-    // baú: quadro 0 fechado, 1 aberto
-    {
-      const [sheet, index] = OBJECT_SHEETS.chest;
-      const img = this.textures.get(`mz_characters_${sheet}`).getSourceImage();
-      const [fw, fh] = charFrameSize(sheet, img);
-      const bx = (index % 4) * fw * 3;
-      const by = Math.floor(index / 4) * fh * 4;
-      const { canvas, ctx } = makeCanvas(fw * 2, fh);
-      ctx.drawImage(img, bx, by, fw, fh, 0, 0, fw, fh);
-      ctx.drawImage(img, bx, by + fh * 3, fw, fh, fw, 0, fw, fh);
-      addSheet(this, 'chest', canvas, fw, fh);
-    }
-    // cristal de salvamento: 6 quadros animados
-    {
-      const [sheet, index] = OBJECT_SHEETS.save;
-      const img = this.textures.get(`mz_characters_${sheet}`).getSourceImage();
-      const [fw, fh] = charFrameSize(sheet, img);
-      const bx = (index % 4) * fw * 3;
-      const by = Math.floor(index / 4) * fh * 4;
-      const { canvas, ctx } = makeCanvas(fw * 6, fh);
-      for (let i = 0; i < 6; i++) ctx.drawImage(img, bx + (i % 3) * fw, by + Math.floor(i / 3) * fh, fw, fh, i * fw, 0, fw, fh);
-      addSheet(this, 'altar', canvas, fw, fh);
-    }
   }
 }

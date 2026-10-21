@@ -2,12 +2,8 @@
 
 RPG de fantasia medieval por turnos, no estilo dos clássicos 16-bit (Final Fantasy V / RPG Maker).
 Desktop via **Electron + Phaser 3**, também jogável no navegador (inclusive no celular, com controles de toque).
-Os gráficos (tilesets, personagens, battlers, inimigos, rostos, fundos de batalha, janela e fonte) vêm do
-**RPG Maker MZ** e ficam em `assets/mz/`; a música chiptune é gerada em código.
-
-> **Aviso de licença:** os arquivos de `assets/mz/` pertencem ao RPG Maker MZ e só podem ser usados por quem
-> tem a licença. Este projeto é de uso pessoal/teste: mantenha o repositório **privado** e o site com
-> **senha** (Netlify → Site configuration → Access & security → Password protection).
+Toda a arte (tiles, personagens, monstros, retratos, janelas, fonte) e a música chiptune são geradas em código;
+não há assets externos.
 
 ## Como rodar
 
@@ -18,11 +14,10 @@ npm start
 
 | Comando | O que faz |
 |---|---|
-| `npm start` | Abre o jogo (janela 1104x624, 16:9, tiles de 48px) |
+| `npm start` | Abre o jogo (janela 1104x624, 16:9; arte em 16px ampliada 3x) |
 | `npm run debug` | Abre com DevTools e atalhos de depuração |
 | `npm run check` | Valida mapas, eventos e referências de dados |
 | `npm run smoke` | Abre o Electron, registra erros do console e fecha sozinho |
-| `npm run import-mz -- "<pasta do MZ>"` | Recopia de uma instalação do RPG Maker MZ os arquivos usados para `assets/mz/` |
 | `npm run serve` | Serve a pasta em `http://localhost:5173` para testar como site estático |
 
 ## Versão web
@@ -80,19 +75,16 @@ Roteiro: Vila → Ancião → Templo (Selene + lanterna) → Bosque de Verdemar 
 electron/        processo principal (janela, IPC de saves) e preload
 src/main.js      configuração do Phaser e registro das cenas
 src/core/        estado do jogo, saves, controles, áudio, fórmulas, fonte, utilitários de pixel
-src/art/         montagem dos mapas com autotiles do MZ (mzTiles.js) e geradores procedurais antigos
-src/data/mzAssets.js  quais arquivos do MZ são usados (sprites, battlers, rostos, inimigos, fundos)
-assets/mz/       arquivos copiados do RPG Maker MZ (ver aviso de licença)
-src/ui/          janelas com a skin do MZ, listas com cursor, caixa de diálogo
+src/art/         geradores de tiles, personagens, monstros, efeitos e fundos de batalha
+src/ui/          janelas estilo FF, listas com cursor, caixa de diálogo
 src/data/        heróis, habilidades, itens, inimigos, lojas, música, história e mapas
 src/scenes/      Boot, Título, Prólogo, Mapa, Batalha, Menu, Loja, Save/Load, Game Over, Fim de capítulo
-tools/           validador de dados, importador do MZ e servidor estático
+tools/           validador de dados e servidor estático
 ```
 
 ### Adicionar um mapa
 
-Crie um objeto em `src/data/maps/` com `rows` (caracteres da legenda em `legend.js`, com o tile do MZ
-de cada caractere definido em `src/art/mzTiles.js`) e `events`
+Crie um objeto em `src/data/maps/` com `rows` (caracteres da legenda em `legend.js`) e `events`
 (`warp`, `npc`, `obj`, `chest`, `save`, `touch`, `read`, `auto`, `light`), registre-o em
 `src/data/maps/index.js` e rode `npm run check`. Scripts de evento são funções `async (a) => {}` que
 usam a API do mapa (`a.say`, `a.ask`, `a.battle`, `a.give`, `a.join`, `a.move`, `a.warp`, …),

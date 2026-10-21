@@ -1,4 +1,4 @@
-// Resolução interna 16:9 (tiles de 48px do RPG Maker MZ)
+// Resolução interna 16:9; a arte é desenhada em 16px e ampliada 3x (tiles de 48px na tela)
 export const W = 1104;
 export const H = 624;
 export const TILE = 48;
@@ -6,7 +6,8 @@ export const TILE = 48;
 export const UI_SCALE = 3;
 export const UW = W / UI_SCALE; // 368
 export const UH = H / UI_SCALE; // 208
-export const FONT = 'MZFont, "M PLUS 1 Code", monospace';
+export const FONT = 'pix';
+// tamanho "1x" da fonte pixelada; tamanhos maiores são ampliações inteiras dela
 export const FONT_SIZE = 9;
 
 const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '');

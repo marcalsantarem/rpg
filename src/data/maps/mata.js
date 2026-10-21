@@ -13,7 +13,7 @@ async function mirelaScene(a) {
   const won = await a.battle(['cavaleiro', 'cavaleiro'], { bg: 'bg_deadforest' });
   if (!won) return;
   await a.say('Mirela', 'Hm. Nada mal para um escudeiro. E essa marca na sua mão... a Marca do Sol! Então a profecia era verdade.');
-  await a.say('Aren', 'A Medusa disse que mandou a Lia para Raizmor. E nós temos um Cristal da Aurora.');
+  await a.say('Aren', 'A Rainha Aranha disse que mandou a Lia para Raizmor. E nós temos um Cristal da Aurora.');
   await a.say('Mirela', 'Raizmor é o espírito mais antigo desta floresta. Ele guarda outro fragmento dos sinos, mas a sombra de Morvath o corrompeu.');
   await a.say('Mirela', 'Eu vou com vocês. Estudo os Sinos da Aurora há anos, e sozinha não consigo salvar Raizmor.');
   await a.remove('mirela');

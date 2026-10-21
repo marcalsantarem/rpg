@@ -37,7 +37,7 @@ export class ShopScene extends Phaser.Scene {
     this.sub = null;
     this.qty = null;
     this.cmd = new MenuList(this, this.cmdWin, {
-      x: 12, y: 6, width: 86, rowH: 13,
+      x: 20, y: 6, width: 86, rowH: 13,
       items: [{ label: 'Comprar' }, { label: 'Vender' }, { label: 'Sair' }],
       onSelect: (_it, i) => {
         if (i === 0) this.openBuy();
@@ -98,7 +98,7 @@ export class ShopScene extends Phaser.Scene {
     const items = () =>
       this.shop.stock.map((id) => ({ label: ITEMS[id].name, right: ITEMS[id].price, id, enabled: State.g.gold >= ITEMS[id].price }));
     const list = new MenuList(this, this.listWin, {
-      x: 12, y: 7, width: 246, rowH: 13, visibleRows: 12, items: items(),
+      x: 20, y: 7, width: 246, rowH: 13, visibleRows: 12, items: items(),
       onChange: (it) => {
         this.showInfo(it.id);
         this.setMsg(ITEMS[it.id].desc);
@@ -158,7 +158,7 @@ export class ShopScene extends Phaser.Scene {
       return;
     }
     const list = new MenuList(this, this.listWin, {
-      x: 12, y: 7, width: 246, rowH: 13, visibleRows: 12, items: first,
+      x: 20, y: 7, width: 246, rowH: 13, visibleRows: 12, items: first,
       onChange: (it) => {
         this.showInfo(it.id);
         this.setMsg(`Pago ${sellPrice(ITEMS[it.id])} por unidade.`);

@@ -13,17 +13,6 @@ import { setupTouchPad } from './core/TouchPad.js';
 
 const scenes = [BootScene, TitleScene, IntroScene, MapScene, HudScene, BattleScene, MenuScene, ShopScene, SaveLoadScene, GameOverScene, EndChapterScene, ArtTestScene];
 
-// Fonte do RPG Maker MZ (M+ 1m) — precisa estar carregada antes de medir/criar textos
-async function loadFont() {
-  try {
-    const face = new FontFace('MZFont', 'url(assets/mz/fonts/mplus-1m-regular.woff)');
-    await face.load();
-    document.fonts.add(face);
-  } catch (e) {
-    console.warn('Fonte do MZ indisponível, usando monospace', e);
-  }
-}
-await loadFont();
 setupTouchPad();
 
 const game = new Phaser.Game({

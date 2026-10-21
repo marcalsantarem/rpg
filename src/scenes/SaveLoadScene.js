@@ -30,21 +30,21 @@ export class SaveLoadScene extends Phaser.Scene {
     const win = new Win(this, 0, 24, UW, UH - 24);
     this.slots.forEach((s, i) => {
       const y = 6 + i * 59;
-      win.text(10, y + 2, `Registro ${i + 1}`, COLORS.gray);
+      win.text(20, y + 2, `Registro ${i + 1}`, COLORS.gray);
       if (!s) {
-        win.text(10, y + 22, '— vazio —', COLORS.dim);
+        win.text(20, y + 22, '— vazio —', COLORS.dim);
         return;
       }
       s.party.forEach((id, k) => {
-        if (this.textures.exists(`face_${id}`)) win.add(this.add.image(96 + k * 46, y + 3, `face_${id}`).setOrigin(0).setScale(42 / 144));
+        if (this.textures.exists(`face_${id}`)) win.add(this.add.image(104 + k * 46, y + 3, `face_${id}`).setOrigin(0).setScale(8 / 3));
       });
-      win.text(10, y + 18, `${s.leader}`, COLORS.white);
-      win.text(10, y + 30, `Nv ${s.level}`, COLORS.white);
+      win.text(20, y + 18, `${s.leader}`, COLORS.white);
+      win.text(20, y + 30, `Nv ${s.level}`, COLORS.white);
       win.textRight(UW - 12, y + 2, formatTime(s.time), COLORS.white);
       win.textRight(UW - 12, y + 30, s.place, COLORS.gray);
     });
     this.list = new MenuList(this, win, {
-      x: 8, y: 5, width: UW - 12, rowH: 59,
+      x: 20, y: 7, width: UW - 24, rowH: 59,
       items: this.slots.map((s) => ({ label: '', enabled: save || !!s })),
       onSelect: (_it, i) => this.choose(i),
       onCancel: () => this.close(),

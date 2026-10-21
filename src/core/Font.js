@@ -1,6 +1,6 @@
-import { FONT, FONT_SIZE } from '../config.js';
+import { FONT_SIZE } from '../config.js';
 
-// Fonte bitmap pixelada desenhada em código (com acentos do português) — usada só como reserva.
+// Fonte bitmap pixelada desenhada em código (com acentos do português).
 // Cada glifo: linhas do "corpo" (7 linhas, + até 2 de descendente) começando na linha 2 da célula.
 // Linhas 0-1 da célula ficam reservadas para acentos de maiúsculas.
 
@@ -193,20 +193,24 @@ export function createPixelFont(scene, key = 'pix') {
   scene.cache.bitmapFont.add(key, { data, texture: texKey, frame: null });
 }
 
-// Mede a largura de um texto (em unidades da interface) com a fonte do jogo.
-let measureCtx = null;
-const widthCache = new Map();
+// Escala inteira da fonte para um tamanho pedido (9 = 1x)
+export function fontScale(size = FONT_SIZE) {
+  return Math.max(1, Math.round(size / FONT_SIZE));
+}
+
+// Mede a largura de um texto (em px da interface) sem criar objetos.
+const WIDTHS = {};
 export function textWidth(str, size = FONT_SIZE) {
-  str = String(str);
-  const key = `${size}|${str}`;
-  if (widthCache.has(key)) return widthCache.get(key);
-  if (!measureCtx) measureCtx = document.createElement('canvas').getContext('2d');
-  // mede em tamanho 10x para ter precisão subpixel
-  measureCtx.font = `${size * 10}px ${FONT}`;
-  const w = Math.ceil(measureCtx.measureText(str).width / 10) + 1;
-  if (widthCache.size > 4000) widthCache.clear();
-  widthCache.set(key, w);
-  return w;
+  let w = 0;
+  for (const ch of String(str)) {
+    if (WIDTHS[ch] === undefined) {
+      const base = COMPOSED[ch] ? COMPOSED[ch][0] : ch;
+      const g = G[base];
+      WIDTHS[ch] = ch === ' ' ? 4 : g ? g[0].length + 1 : 6;
+    }
+    w += WIDTHS[ch];
+  }
+  return w * fontScale(size);
 }
 
 // Quebra o texto em linhas que caibam em maxWidth.

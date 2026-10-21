@@ -9,8 +9,7 @@
     "debug": "electron . --debug",
     "smoke": "electron . --smoke",
     "check": "node tools/check-data.mjs",
-    "serve": "node tools/serve.mjs",
-    "import-mz": "node tools/import-mz.mjs"
+    "serve": "node tools/serve.mjs"
   },
   "keywords": [],
   "author": "",

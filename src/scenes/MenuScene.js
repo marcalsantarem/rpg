@@ -7,7 +7,6 @@ import { State, heroStats, heroSkills, heroBaseStats, itemCount, removeItem, equ
 import { Win, MenuList, drawBar, uiCamera } from '../ui/UI.js';
 import { wrapText } from '../core/Font.js';
 import { HEROES, expForLevel } from '../data/heroes.js';
-import { BATTLERS } from '../data/mzAssets.js';
 import { ITEMS, canEquip, STAT_NAMES } from '../data/items.js';
 import { SKILLS } from '../data/skills.js';
 import { MAP_NAMES } from '../data/maps/index.js';
@@ -75,7 +74,7 @@ export class MenuScene extends Phaser.Scene {
     this.timeText = infoWin.textRight(84, 24, formatTime(State.g.playTime));
 
     const list = new MenuList(this, cmdWin, {
-      x: 12, y: 6, width: 74, rowH: 13.5,
+      x: 20, y: 6, width: 74, rowH: 13.5,
       items: [
         { label: 'Itens', v: 'items' },
         { label: 'Habilid.', v: 'skills' },
@@ -110,10 +109,7 @@ export class MenuScene extends Phaser.Scene {
       const y = 6 + i * 49;
       const def = HEROES[h.id];
       const s = heroStats(h);
-      const faceKey = this.textures.exists(`face_${h.id}`) ? `face_${h.id}` : null;
-      const spr = faceKey
-        ? this.add.image(6, y + 1, faceKey).setOrigin(0).setScale(44 / 144)
-        : this.add.image(28, y + 40, `chr_${def.sprite}`, 0).setOrigin(0.5, 1).setScale(1 / 3);
+      const spr = this.add.sprite(34, y + 46, `chr_${def.sprite}`, 0).setOrigin(0.5, 1).setScale(2);
       if (h.hp <= 0) spr.setTint(0x806070);
       win.add(spr);
       this.partyObjs.push(spr);
@@ -139,7 +135,7 @@ export class MenuScene extends Phaser.Scene {
   pickHero(cb, { filter, keep = false } = {}) {
     const items = State.g.party.map((h, i) => ({ label: '', i, enabled: filter ? filter(h) : true }));
     const list = new MenuList(this, this.partyWin, {
-      x: 6, y: 6, width: 264, rowH: 49, items,
+      x: 16, y: 6, width: 264, rowH: 49, items,
       onSelect: (it) => {
         if (!keep) this.pop();
         cb(it.i);
@@ -201,7 +197,7 @@ export class MenuScene extends Phaser.Scene {
     };
     const showDesc = (it) => desc.setText(it ? ITEMS[it.id].desc : 'Nenhum item.');
     const list = new MenuList(this, win, {
-      x: 12, y: 7, width: UW - 20, cols: 2, colW: 174, rowH: 13, visibleRows: 13, items: entries(),
+      x: 20, y: 7, width: UW - 20, cols: 2, colW: 174, rowH: 13, visibleRows: 13, items: entries(),
       onChange: showDesc,
       onSelect: (it) => {
         const item = ITEMS[it.id];
@@ -296,7 +292,7 @@ export class MenuScene extends Phaser.Scene {
       });
     const showDesc = (it) => desc.setText(it ? SKILLS[it.id].desc ?? '' : '');
     const list = new MenuList(this, win, {
-      x: 12, y: 7, width: UW - 20, cols: 2, colW: 174, rowH: 13, visibleRows: 11, items: entries(),
+      x: 20, y: 7, width: UW - 20, cols: 2, colW: 174, rowH: 13, visibleRows: 11, items: entries(),
       onChange: showDesc,
       onSelect: (it) => {
         const sk = SKILLS[it.id];
@@ -371,7 +367,7 @@ export class MenuScene extends Phaser.Scene {
     const listWin = new Win(this, 150, 74, 218, 134, { depth: 11000 });
     const bottom = new Win(this, 0, 24, 150, 40, { depth: 11000 });
     objs.push(top, statWin, slotWin, listWin, bottom);
-    if (this.textures.exists(`face_${h.id}`)) bottom.add(this.add.image(6, 4, `face_${h.id}`).setOrigin(0).setScale(32 / 144));
+    if (this.textures.exists(`face_${h.id}`)) bottom.add(this.add.image(6, 4, `face_${h.id}`).setOrigin(0).setScale(2));
     bottom.text(44, 6, HEROES[h.id].name, COLORS.yellow);
     bottom.text(44, 18, `Nv ${h.level} ${HEROES[h.id].job}`, COLORS.gray);
     statWin.text(8, 126, 'Esq.: remover', COLORS.dim);
@@ -397,10 +393,10 @@ export class MenuScene extends Phaser.Scene {
     drawStats(null);
     const slots = ['weapon', 'armor', 'accessory'];
     const slotItems = () =>
-      slots.map((s) => ({ label: `${{ weapon: 'Arma', armor: 'Corpo', accessory: 'Acess.' }[s]} ${h.equip[s] ? ITEMS[h.equip[s]].name : '—'}`, s }));
+      slots.map((s) => ({ label: `${{ weapon: 'Arma:  ', armor: 'Corpo: ', accessory: 'Acess.:' }[s]} ${h.equip[s] ? ITEMS[h.equip[s]].name : '—'}`, s }));
     let pickList = null;
     const slotList = new MenuList(this, slotWin, {
-      x: 12, y: 5, width: 200, rowH: 13, items: slotItems(),
+      x: 20, y: 5, width: 200, rowH: 13, items: slotItems(),
       onChange: (it) => desc.setText(h.equip[it.s] ? ITEMS[h.equip[it.s]].desc : ''),
       onSelect: (it) => {
         const slot = it.s;
@@ -415,7 +411,7 @@ export class MenuScene extends Phaser.Scene {
           desc.setText(o && o.id ? ITEMS[o.id].desc : 'Remover o equipamento.');
         };
         pickList = new MenuList(this, listWin, {
-          x: 12, y: 7, width: 200, rowH: 13, visibleRows: 9, items: options,
+          x: 20, y: 7, width: 200, rowH: 13, visibleRows: 9, items: options,
           onChange: preview,
           onSelect: (o) => {
             equip(h, slot, o.id);
@@ -475,12 +471,12 @@ export class MenuScene extends Phaser.Scene {
       const s = heroStats(h);
       const base = heroBaseStats(h);
       win = new Win(this, 0, 0, UW, UH, { depth: 11000 });
-      if (this.textures.exists(`face_${h.id}`)) win.add(this.add.image(8, 8, `face_${h.id}`).setOrigin(0).setScale(48 / 144));
-      if (this.textures.exists(`mz_sv_actors_${BATTLERS[h.id]}`)) {
-        const sv = this.add.sprite(334, 96, `mz_sv_actors_${BATTLERS[h.id]}`, 9).setOrigin(0.5, 1).setScale(2 / 3);
+      if (this.textures.exists(`face_${h.id}`)) win.add(this.add.image(8, 8, `face_${h.id}`).setOrigin(0).setScale(3));
+      {
+        const sv = this.add.sprite(334, 96, `chr_${HEROES[h.id].sprite}`, 0).setOrigin(0.5, 1).setScale(3);
         win.add(sv);
         let p = 0;
-        this.time.addEvent({ delay: 160, repeat: -1, callback: () => sv.active && sv.setFrame(9 + [0, 1, 2, 1][++p % 4]) });
+        this.time.addEvent({ delay: 220, repeat: -1, callback: () => sv.active && sv.setFrame([0, 1, 0, 2][++p % 4]) });
       }
       win.text(64, 8, def.name, COLORS.yellow);
       win.text(64, 20, def.job, COLORS.gray);
@@ -507,7 +503,7 @@ export class MenuScene extends Phaser.Scene {
       win.text(136, 114, 'Habilidades', COLORS.gray);
       heroSkills(h).forEach((sk, i) => win.text(136 + (i % 2) * 110, 126 + Math.floor(i / 2) * 11, SKILLS[sk].name, COLORS.white));
       wrapText(def.bio, UW - 16).forEach((l, i) => win.text(8, 166 + i * 11, l, COLORS.gray));
-      if (State.g.party.length > 1) win.text(UW - 120, 194, '< >  trocar personagem', COLORS.dim);
+      if (State.g.party.length > 1) win.textRight(UW - 8, 194, '< >  trocar personagem', COLORS.dim);
     };
     build();
     this.push({

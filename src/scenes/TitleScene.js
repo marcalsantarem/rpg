@@ -1,5 +1,5 @@
 // Tela inicial com cenário noturno animado.
-import { W, H, UW, UH, COLORS } from '../config.js';
+import { UW, UH, COLORS } from '../config.js';
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { Settings } from '../core/Settings.js';
@@ -9,26 +9,31 @@ import { Win, MenuList, makeText, uiCamera } from '../ui/UI.js';
 import { textWidth } from '../core/Font.js';
 import { makeCanvas, rng, px, rect, disc, poly, thick, mix, addTexture } from '../core/Pixel.js';
 import { STORY } from '../data/story.js';
-import { TITLE_IMAGE } from '../data/mzAssets.js';
 
 function buildTitleArt(scene) {
   if (scene.textures.exists('title_bg')) return;
+  // desenhado em 368x240 (a faixa de cima fica fora da tela de 208 de altura)
+  const W = UW;
+  const H = 240;
+  const OX = (UW - 320) / 2;
   const { canvas, ctx } = makeCanvas(W, H);
   const r = rng(13);
   for (let y = 0; y < H; y++) rect(ctx, 0, y, W, 1, mix('#0a0c24', '#4a3a6a', Math.floor((y / 200) * 10) / 10));
   for (let i = 0; i < 110; i++) px(ctx, Math.floor(r() * W), Math.floor(r() * 140), r() < 0.3 ? '#f0f0ff' : '#8a88b8');
+  ctx.save();
+  ctx.translate(OX, 0);
   // lua prateada
   disc(ctx, 272, 112, 26, '#3a3a6a');
   disc(ctx, 272, 112, 22, '#c8c8e0');
   disc(ctx, 268, 108, 18, '#e8e8f8');
   for (const [x, y, rr] of [[280, 116, 3], [264, 120, 2], [276, 102, 2]]) disc(ctx, x, y, rr, '#b8b8d4');
   // montanhas
-  poly(ctx, [[0, 170], [40, 120], [80, 150], [130, 100], [190, 160], [240, 118], [290, 150], [320, 128], [320, 240], [0, 240]], '#2a2448');
+  poly(ctx, [[-OX, 160], [0, 170], [40, 120], [80, 150], [130, 100], [190, 160], [240, 118], [290, 150], [320, 128], [W - OX, 150], [W - OX, 240], [-OX, 240]], '#2a2448');
   poly(ctx, [[130, 100], [118, 114], [138, 112]], '#d8d8f0');
   poly(ctx, [[240, 118], [230, 128], [248, 127]], '#d8d8f0');
   // colinas
   const hill = (base, amp, color, f) => {
-    for (let x = 0; x < W; x++) {
+    for (let x = -OX; x < W - OX; x++) {
       const h = base - Math.round(Math.sin(x * f) * amp + Math.sin(x * f * 2.7) * amp * 0.4);
       rect(ctx, x, h, 1, H - h, color);
     }
@@ -67,7 +72,8 @@ function buildTitleArt(scene) {
     poly(ctx, [[x - 2, 197], [x + 9, 188], [x + 20, 197]], '#120e22');
     rect(ctx, x + 7, 201, 4, 4, '#f0c060');
   }
-  rect(ctx, 0, 218, W, 22, '#0a0818');
+  rect(ctx, -OX, 218, W, 22, '#0a0818');
+  ctx.restore();
   addTexture(scene, 'title_bg', canvas);
 }
 
@@ -84,24 +90,15 @@ export class TitleScene extends Phaser.Scene {
     uiCamera(this);
     this.scene.stop('Hud');
     this.scene.launch('Hud');
-    // ilustração de título do MZ cobrindo a tela
-    const bgKey = `mz_titles1_${TITLE_IMAGE}`;
-    if (this.textures.exists(bgKey)) {
-      const img = this.textures.get(bgKey).getSourceImage();
-      const sc = Math.max(W / img.width, H / img.height) / 3;
-      this.add.image(UW / 2, UH / 2, bgKey).setScale(sc);
-      this.add.rectangle(0, 0, UW, UH, 0x080418, 0.25).setOrigin(0);
-    } else {
-      buildTitleArt(this);
-      this.add.image(0, 0, 'title_bg').setOrigin(0);
-    }
+    buildTitleArt(this);
+    this.add.image(0, UH - 240, 'title_bg').setOrigin(0);
     this.fog1 = this.add.tileSprite(0, UH - 80, UW, 80, 'fog').setOrigin(0).setTint(0x8070c0).setAlpha(0.25);
     this.fog2 = this.add.tileSprite(0, UH - 60, UW, 60, 'fog').setOrigin(0).setTint(0xb0a8e0).setAlpha(0.18);
 
     // morcegos
     this.bats = [];
     for (let i = 0; i < 4; i++) {
-      const b = this.add.image(-40, 30 + i * 22, 'chr_fairy', 0).setScale(0.28).setAlpha(0.85);
+      const b = this.add.image(-40, 30 + i * 18, 'chr_fairy', 0).setScale(0.6).setAlpha(0.8);
       b.speed = 0.15 + Math.random() * 0.25;
       b.phase = Math.random() * 6;
       b.x = Math.random() * UW;
@@ -112,10 +109,10 @@ export class TitleScene extends Phaser.Scene {
     const title = STORY.title;
     const tw = textWidth(title, 28);
     const tx = Math.round((UW - tw) / 2);
-    makeText(this, tx + 2, 30, title, 0x000000, 28).setAlpha(0.6);
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [2, 3]]) makeText(this, tx + dx, 28 + dy, title, 0x000000, 28);
     this.titleText = makeText(this, tx, 28, title, 0xf0c850, 28);
     const st = STORY.subtitle;
-    makeText(this, Math.round((UW - textWidth(st)) / 2), 66, st, 0xe0d8f0);
+    makeText(this, Math.round((UW - textWidth(st)) / 2), 66, st, 0xb8a8c0);
     makeText(this, 4, UH - 13, 'v0.2', COLORS.dim);
     makeText(this, UW - textWidth('Z: confirmar  X: voltar') - 4, UH - 13, 'Z: confirmar  X: voltar', COLORS.dim);
 
@@ -129,7 +126,7 @@ export class TitleScene extends Phaser.Scene {
     const desktop = !!window.desktop;
     const win = new Win(this, Math.round(UW / 2 - 50), 104, 100, 70);
     this.menu = new MenuList(this, win, {
-      x: 14, y: 8, width: 80, rowH: 13,
+      x: 20, y: 8, width: 80, rowH: 13,
       index: hasSave ? 1 : 0,
       items: [
         { label: 'Novo Jogo', v: 'new' },

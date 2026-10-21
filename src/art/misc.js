@@ -191,14 +191,15 @@ function eventSprites(scene) {
   addTexture(scene, 'obj_shade', c.canvas);
 }
 
-// ---------- fundos de batalha 320x160 ----------
+// ---------- fundos de batalha 368x160 (largura da tela 16:9) ----------
+const BW = 368;
 function bgForest(ctx, r, pal) {
-  for (let y = 0; y < 160; y++) rect(ctx, 0, y, 320, 1, mix(pal.sky0, pal.sky1, Math.floor((y / 110) * 8) / 8));
+  for (let y = 0; y < 160; y++) rect(ctx, 0, y, BW, 1, mix(pal.sky0, pal.sky1, Math.floor((y / 110) * 8) / 8));
   if (pal.moon) {
-    disc(ctx, 150, 26, 13, pal.moon);
-    disc(ctx, 146, 23, 11, shade(pal.moon, 0.1));
-    disc(ctx, 155, 30, 2, shade(pal.moon, -0.12));
-    disc(ctx, 145, 29, 1, shade(pal.moon, -0.12));
+    disc(ctx, BW / 2 - 10, 26, 13, pal.moon);
+    disc(ctx, BW / 2 - 14, 23, 11, shade(pal.moon, 0.1));
+    disc(ctx, BW / 2 - 5, 30, 2, shade(pal.moon, -0.12));
+    disc(ctx, BW / 2 - 15, 29, 1, shade(pal.moon, -0.12));
   }
   // camadas de árvores
   const layers = [
@@ -206,7 +207,7 @@ function bgForest(ctx, r, pal) {
     { c: pal.mid, base: 110, h: 60 },
   ];
   for (const L of layers) {
-    for (let x = -10; x < 330; x += 14 + Math.floor(r() * 10)) {
+    for (let x = -10; x < BW + 10; x += 14 + Math.floor(r() * 10)) {
       const h = L.h * (0.6 + r() * 0.5);
       if (pal.dead) {
         thick(ctx, x, L.base + 20, x + (r() - 0.5) * 6, L.base - h, 2, L.c);
@@ -220,36 +221,36 @@ function bgForest(ctx, r, pal) {
       }
     }
   }
-  rect(ctx, 0, 110, 320, 50, pal.ground);
-  for (let i = 0; i < 400; i++) px(ctx, Math.floor(r() * 320), 110 + Math.floor(r() * 50), r() < 0.5 ? shade(pal.ground, 0.12) : shade(pal.ground, -0.2));
-  for (let y = 110; y < 160; y += 6) rect(ctx, 0, y, 320, 1, shade(pal.ground, -0.08));
-  rect(ctx, 0, 108, 320, 3, shade(pal.ground, -0.3));
+  rect(ctx, 0, 110, BW, 50, pal.ground);
+  for (let i = 0; i < 400; i++) px(ctx, Math.floor(r() * BW), 110 + Math.floor(r() * 50), r() < 0.5 ? shade(pal.ground, 0.12) : shade(pal.ground, -0.2));
+  for (let y = 110; y < 160; y += 6) rect(ctx, 0, y, BW, 1, shade(pal.ground, -0.08));
+  rect(ctx, 0, 108, BW, 3, shade(pal.ground, -0.3));
   // névoa
-  for (let i = 0; i < 6; i++) ellipse(ctx, Math.floor(r() * 320), 104 + Math.floor(r() * 10), 40, 4, pal.mist);
+  for (let i = 0; i < 6; i++) ellipse(ctx, Math.floor(r() * BW), 104 + Math.floor(r() * 10), 40, 4, pal.mist);
 }
 
 function bgCave(ctx, r, web) {
-  for (let y = 0; y < 160; y++) rect(ctx, 0, y, 320, 1, mix('#1a1216', '#0a0608', Math.floor((y / 160) * 6) / 6));
+  for (let y = 0; y < 160; y++) rect(ctx, 0, y, BW, 1, mix('#1a1216', '#0a0608', Math.floor((y / 160) * 6) / 6));
   // paredes rochosas
   for (let i = 0; i < 60; i++) {
-    const x = Math.floor(r() * 320);
+    const x = Math.floor(r() * BW);
     const y = Math.floor(r() * 100);
     ellipse(ctx, x, y, 10 + Math.floor(r() * 20), 6 + Math.floor(r() * 10), r() < 0.5 ? '#2a1e24' : '#221820');
   }
   // estalactites
-  for (let x = 0; x < 320; x += 12 + Math.floor(r() * 16)) {
+  for (let x = 0; x < BW; x += 12 + Math.floor(r() * 16)) {
     const h = 10 + Math.floor(r() * 30);
     poly(ctx, [[x, 0], [x + 5, h], [x + 10, 0]], '#30242a');
     line(ctx, x + 2, 0, x + 5, h - 2, '#45363e');
   }
-  rect(ctx, 0, 112, 320, 48, '#2e2428');
-  for (let i = 0; i < 300; i++) px(ctx, Math.floor(r() * 320), 112 + Math.floor(r() * 48), r() < 0.5 ? '#3a2e34' : '#1e161a');
-  rect(ctx, 0, 110, 320, 3, '#160e12');
-  for (let x = 0; x < 320; x += 30 + Math.floor(r() * 30)) {
+  rect(ctx, 0, 112, BW, 48, '#2e2428');
+  for (let i = 0; i < 300; i++) px(ctx, Math.floor(r() * BW), 112 + Math.floor(r() * 48), r() < 0.5 ? '#3a2e34' : '#1e161a');
+  rect(ctx, 0, 110, BW, 3, '#160e12');
+  for (let x = 0; x < BW; x += 30 + Math.floor(r() * 30)) {
     poly(ctx, [[x, 112], [x + 6, 92 - Math.floor(r() * 10)], [x + 12, 112]], '#3a2e34');
   }
   for (let i = 0; i < 10; i++) {
-    const x = Math.floor(r() * 320);
+    const x = Math.floor(r() * BW);
     const y = 118 + Math.floor(r() * 38);
     poly(ctx, [[x, y], [x + 2, y - 7], [x + 4, y]], '#4a90d0');
     line(ctx, x + 1, y - 1, x + 2, y - 6, '#9ad8f8');
@@ -267,20 +268,20 @@ function bgCave(ctx, r, web) {
       }
     };
     webAt(30, 20, 36);
-    webAt(290, 30, 40);
-    webAt(160, -5, 50);
+    webAt(BW - 30, 30, 40);
+    webAt(BW / 2, -5, 50);
   }
 }
 
 function bgGrove(ctx, r) {
   bgForest(ctx, r, { sky0: '#120a24', sky1: '#3a2a60', far: '#22183a', mid: '#140e26', ground: '#262234', mist: '#7a5ab0', moon: '#f0f0ff', dead: true });
-  for (let i = 0; i < 10; i++) curve(ctx, Math.floor(r() * 320), 160, Math.floor(r() * 320), 120, Math.floor(r() * 320), 112, 2, '#3a2a3a');
-  for (let i = 0; i < 40; i++) px(ctx, Math.floor(r() * 320), 60 + Math.floor(r() * 90), r() < 0.5 ? '#f0e080' : '#a0f0e0');
+  for (let i = 0; i < 10; i++) curve(ctx, Math.floor(r() * BW), 160, Math.floor(r() * BW), 120, Math.floor(r() * BW), 112, 2, '#3a2a3a');
+  for (let i = 0; i < 40; i++) px(ctx, Math.floor(r() * BW), 60 + Math.floor(r() * 90), r() < 0.5 ? '#f0e080' : '#a0f0e0');
 }
 
 export function buildBattleBackgrounds(scene) {
   const make = (key, fn) => {
-    const { canvas, ctx } = makeCanvas(320, 160);
+    const { canvas, ctx } = makeCanvas(BW, 160);
     fn(ctx, rng(key.length * 131));
     addTexture(scene, key, canvas);
   };
