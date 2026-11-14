@@ -62,7 +62,44 @@ export const SKILLS = {
   galho_seiva: { name: 'Seiva Sombria', type: 'heal', power: 160, target: 'self', anim: 'heal' },
   galho_esporos: { name: 'Pólen Venenoso', type: 'status', status: { veneno: 0.6, cego: 0.3 }, target: 'allEnemies', anim: 'poison' },
   galho_grito: { name: 'Rugido da Floresta', type: 'magic', power: 30, element: 'trevas', status: { pavor: 0.4 }, target: 'allEnemies', anim: 'dark' },
+
+  // ----- Habilidades Cooperativas (Dual Techs) -----
+  aurora_purificadora: { name: 'Aurora Purificadora', mp: 12, type: 'magic', power: 45, healPower: 30, element: 'aurora', target: 'allEnemies', anim: 'light', desc: 'Aren + Selene: Dano de Aurora a todos e cura o grupo.' },
+  flecha_solar: { name: 'Flecha Solar', mp: 10, type: 'phys', power: 2.8, element: 'aurora', crit: true, target: 'enemy', anim: 'crit', desc: 'Aren + Kael: Flecha imbuída de sol, crítica e perfurante.' },
+  estrela_cadente: { name: 'Estrela Cadente', mp: 16, type: 'magic', power: 55, element: 'luz', target: 'allEnemies', anim: 'light', desc: 'Selene + Mirela: Fragmentos astrais em todos os inimigos.' },
+  emboscada_flamejante: { name: 'Emboscada Flamejante', mp: 12, type: 'phys', power: 2.2, element: 'fogo', target: 'allEnemies', anim: 'fire', desc: 'Kael + Mirela: Armadilha veloz e explosiva em área.' },
 };
+
+export const DUAL_SKILLS = [
+  {
+    id: 'aurora_purificadora',
+    name: 'Aurora Purificadora',
+    pair: ['aren', 'selene'],
+    mp: { aren: 6, selene: 6 },
+    desc: 'Aren + Selene: Luz sagrada em todos e cura o grupo.',
+  },
+  {
+    id: 'flecha_solar',
+    name: 'Flecha Solar',
+    pair: ['aren', 'kael'],
+    mp: { aren: 4, kael: 6 },
+    desc: 'Aren + Kael: Disparo solar crítico de alta perfuração.',
+  },
+  {
+    id: 'estrela_cadente',
+    name: 'Estrela Cadente',
+    pair: ['selene', 'mirela'],
+    mp: { selene: 8, mirela: 8 },
+    desc: 'Selene + Mirela: Chuva astral de fogo sagrado em todos.',
+  },
+  {
+    id: 'emboscada_flamejante',
+    name: 'Emboscada Flamejante',
+    pair: ['kael', 'mirela'],
+    mp: { kael: 5, mirela: 7 },
+    desc: 'Kael + Mirela: Armadilha flamejante em todos os inimigos.',
+  },
+];
 
 export const STATUS_NAMES = { veneno: 'Veneno', cego: 'Cegueira', pavor: 'Medo', sono: 'Sono' };
 export const STATUS_SHORT = { veneno: 'VEN', cego: 'CEG', pavor: 'MED', sono: 'SON' };

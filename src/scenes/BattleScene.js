@@ -7,16 +7,17 @@ const LOOP_MOTIONS = new Set(['walk', 'wait', 'guard', 'dying', 'abnormal', 'sle
 const POSES = { walk: [4, 3, 5, 3], wait: [3], guard: [3], dying: [3], abnormal: [3], sleep: [3], damage: [3], victory: [0, 0, 1, 0, 0, 2], escape: [7, 6, 8, 6], action: [4, 5, 4] };
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
-import { State, heroStats, heroSkills, heroProtects, gainExp, addItem, removeItem, itemCount } from '../core/GameState.js';
+import { Settings } from '../core/Settings.js';
+import { State, heroStats, heroSkills, heroProtects, gainExp, addItem, removeItem, itemCount, recordBestiary } from '../core/GameState.js';
 import { physDamage, magicDamage, healAmount, hitChance, critChance, fleeChance } from '../core/Formulas.js';
 import { Win, MenuList, makeText, uiCamera } from '../ui/UI.js';
 import { textWidth } from '../core/Font.js';
-import { SKILLS, STATUS_NAMES } from '../data/skills.js';
+import { SKILLS, DUAL_SKILLS, STATUS_NAMES } from '../data/skills.js';
 import { ITEMS } from '../data/items.js';
 import { ENEMIES } from '../data/enemies.js';
 import { HEROES } from '../data/heroes.js';
 
-const wait = (scene, ms) => new Promise((r) => scene.time.delayedCall(ms, r));
+const wait = (scene, ms) => new Promise((r) => scene.time.delayedCall(Settings.battleSpeed === 2 ? Math.round(ms * 0.55) : ms, r));
 const STATUS_COLOR = { veneno: COLORS.green, pavor: COLORS.purple, sono: COLORS.blue, cego: COLORS.gray };
 
 export class BattleScene extends Phaser.Scene {
@@ -156,6 +157,8 @@ export class BattleScene extends Phaser.Scene {
 
   // ------------------------------------------------------------ janelas
   createWindows() {
+    this.timelineWin = new Win(this, 4, 3, UW - 8, 16, { depth: 9500 });
+    this.timelineTexts = [];
     this.enemyWin = new Win(this, 0, FIELD_H, 136, UH - FIELD_H);
     this.partyWin = new Win(this, 136, FIELD_H, UW - 136, UH - FIELD_H);
     this.enemyTexts = [];
@@ -166,7 +169,34 @@ export class BattleScene extends Phaser.Scene {
     this.topWin.setVisible(false);
   }
 
+  updateTimeline(active = null) {
+    if (!this.timelineWin) return;
+    this.timelineTexts.forEach((t) => t.destroy());
+    this.timelineTexts = [];
+    const pool = [
+      ...this.alive(this.heroes).map((h) => ({ name: h.name, agi: h.agi, isHero: true, ref: h })),
+      ...this.alive(this.enemies).map((e) => ({ name: e.name.split(' ')[0], agi: e.agi, isHero: false, ref: e })),
+    ];
+    pool.sort((a, b) => b.agi - a.agi);
+    let curX = 8;
+    this.timelineTexts.push(this.timelineWin.text(curX, 4, 'Turnos:', COLORS.gray));
+    curX += 46;
+    pool.slice(0, 5).forEach((p, idx) => {
+      const isAct = p.ref === active;
+      const col = isAct ? COLORS.yellow : p.isHero ? COLORS.blue : COLORS.red;
+      const t = this.timelineWin.text(curX, 4, p.name, col);
+      this.timelineTexts.push(t);
+      curX += textWidth(p.name) + 4;
+      if (idx < Math.min(pool.length, 5) - 1) {
+        const sep = this.timelineWin.text(curX, 4, '>', COLORS.dim);
+        this.timelineTexts.push(sep);
+        curX += 10;
+      }
+    });
+  }
+
   refreshWindows(active = null) {
+    this.updateTimeline(active);
     this.enemyTexts.forEach((t) => t.destroy());
     this.enemyTexts = [];
     const names = [];
@@ -296,9 +326,18 @@ export class BattleScene extends Phaser.Scene {
     this.heroStep(hero, true);
     this.setMotion(hero, 'walk');
     const win = new Win(this, 0, FIELD_H, 136, UH - FIELD_H, { depth: 11000 });
+    const availableDuals = DUAL_SKILLS.filter((d) => {
+      if (!d.pair.includes(hero.id)) return false;
+      const partnerId = d.pair.find((id) => id !== hero.id);
+      const partner = this.heroes.find((h) => h.id === partnerId && h.hp > 0);
+      if (!partner) return false;
+      return hero.mp >= d.mp[hero.id] && partner.mp >= d.mp[partnerId];
+    });
+
     const items = [
       { label: 'Atacar', v: 'attack' },
       { label: 'Habilidade', v: 'skill', enabled: heroSkills(hero.ref).length > 0 },
+      { label: 'Dupla', v: 'dual', enabled: availableDuals.length > 0 },
       { label: 'Item', v: 'item' },
       { label: 'Defender', v: 'defend' },
       { label: 'Fugir', v: 'flee', enabled: !this.opts.noFlee },
@@ -325,6 +364,17 @@ export class BattleScene extends Phaser.Scene {
         } else if (it.v === 'skill') {
           list.setActive(false);
           this.skillMenu(hero, (act) => {
+            if (!act) {
+              list.setActive(true);
+              this.ui = list;
+              return;
+            }
+            close();
+            done(act);
+          });
+        } else if (it.v === 'dual') {
+          list.setActive(false);
+          this.dualMenu(hero, availableDuals, (act) => {
             if (!act) {
               list.setActive(true);
               this.ui = list;
@@ -411,6 +461,37 @@ export class BattleScene extends Phaser.Scene {
           if (!targets) return back();
           close();
           done({ actor: hero, skill: it.id, targets });
+        });
+      },
+      () => {
+        this.ui = prev;
+        done(null);
+      },
+    );
+  }
+
+  dualMenu(hero, availableDuals, done) {
+    const entries = availableDuals.map((d) => {
+      const partnerId = d.pair.find((id) => id !== hero.id);
+      const partner = this.heroes.find((h) => h.id === partnerId);
+      return {
+        label: d.name,
+        right: `${d.mp[hero.id]}+${d.mp[partnerId]}MP`,
+        id: d.id,
+        dual: d,
+        partner,
+        desc: d.desc,
+      };
+    });
+    const prev = this.ui;
+    this.listWindow(
+      entries,
+      (it, back, close) => {
+        const s = SKILLS[it.id];
+        this.selectTarget(hero, s.target, (targets) => {
+          if (!targets) return back();
+          close();
+          done({ actor: hero, dual: it.dual, dualPartner: it.partner, skill: it.id, targets });
         });
       },
       () => {
@@ -533,6 +614,19 @@ export class BattleScene extends Phaser.Scene {
 
   // ------------------------------------------------------------ IA inimiga
   enemyAction(e) {
+    if (e.staggered) {
+      e.staggered = false;
+      return { actor: e, staggered: true };
+    }
+    if ((e.boss || Math.random() < 0.22) && !e.charging && this.turn > 1) {
+      e.charging = true;
+      e.sprite.setTint(0xffaa66);
+      return { actor: e, charging: true };
+    }
+    if (e.charging) {
+      e.charging = false;
+      e.sprite.clearTint();
+    }
     const d = e.def0;
     const pick = (list) => {
       const total = list.reduce((a, [, w]) => a + w, 0);
@@ -601,6 +695,17 @@ export class BattleScene extends Phaser.Scene {
 
   async execute(act) {
     const a = act.actor;
+    if (act.staggered) {
+      await this.banner(`${a.name} está atordoado pelo golpe!`, 600);
+      this.hideBanner();
+      return;
+    }
+    if (act.charging) {
+      Audio.sfx('whisper');
+      await this.banner(`${a.name} está canalizando energia sombria!`, 750);
+      this.hideBanner();
+      return;
+    }
     if (act.defend) {
       await this.banner(`${a.name} se defende.`, 450);
       this.hideBanner();
@@ -610,6 +715,30 @@ export class BattleScene extends Phaser.Scene {
     if (!targets.length) return;
     if (a.isHero) await this.heroStep(a, true, 140);
     else await this.enemyBlink(a);
+
+    if (act.dual) {
+      Audio.sfx('combo');
+      const partner = act.dualPartner;
+      if (partner && partner.hp > 0) {
+        await Promise.all([this.heroStep(a, true, 140), this.heroStep(partner, true, 140)]);
+      }
+      a.mp = Math.max(0, a.mp - act.dual.mp[a.id]);
+      if (partner) partner.mp = Math.max(0, partner.mp - act.dual.mp[partner.id]);
+      await this.banner(SKILLS[act.skill].name, 500);
+      this.setMotion(a, 'spell');
+      if (partner) this.setMotion(partner, 'spell');
+      await this.playAnim(SKILLS[act.skill].anim ?? 'light', targets, a);
+      for (const t of targets) await this.applySkill(a, t, SKILLS[act.skill]);
+      if (SKILLS[act.skill].healPower) {
+        const hAmt = healAmount(a, SKILLS[act.skill].healPower);
+        for (const h of this.alive(this.heroes)) this.heal(h, hAmt);
+      }
+      this.hideBanner();
+      if (a.hp > 0) await this.heroStep(a, false, 140);
+      if (partner && partner.hp > 0) await this.heroStep(partner, false, 140);
+      await wait(this, 120);
+      return;
+    }
 
     if (act.item) {
       const it = ITEMS[act.item];
@@ -665,7 +794,7 @@ export class BattleScene extends Phaser.Scene {
             Audio.sfx('crit');
             this.cameras.main.shake(150, 0.008);
           } else Audio.sfx('hit');
-          await this.damage(t, dmg, crit);
+          await this.damage(t, dmg, crit, s.element);
           if (s.drain && a.hp > 0) this.heal(a, Math.round(dmg / 2));
           if (i < hits - 1) await wait(this, 180);
         }
@@ -679,14 +808,14 @@ export class BattleScene extends Phaser.Scene {
           await wait(this, 300);
           break;
         }
-        await this.damage(t, dmg);
+        await this.damage(t, dmg, false, s.element);
         if (s.drain && a.hp > 0) this.heal(a, Math.round(dmg / 2));
         if (t.hp > 0 && s.status) await this.tryStatus(t, s.status);
         break;
       }
       case 'heal': {
         const amt = healAmount(a, s.power);
-        if (t.shadow) await this.damage(t, amt);
+        if (t.shadow) await this.damage(t, amt, false, 'luz');
         else this.heal(t, amt);
         await wait(this, 250);
         break;
@@ -800,8 +929,17 @@ export class BattleScene extends Phaser.Scene {
     this.refreshWindows();
   }
 
-  async damage(t, dmg, crit = false) {
+  async damage(t, dmg, crit = false, element = null) {
     t.hp = Math.max(0, t.hp - dmg);
+    if (!t.isHero && t.charging) {
+      if (crit || (element && (t.weak?.[element] ?? 1) > 1)) {
+        t.charging = false;
+        t.staggered = true;
+        t.sprite.clearTint();
+        Audio.sfx('stagger');
+        this.popup(t, 'INTERROMPIDO!', COLORS.yellow);
+      }
+    }
     if (t.status.has('sono') && Math.random() < 0.6) t.status.delete('sono');
     this.popup(t, `${dmg}`, crit ? COLORS.yellow : COLORS.white);
     this.shakeSprite(t);
@@ -826,6 +964,7 @@ export class BattleScene extends Phaser.Scene {
       await wait(this, 300);
       return;
     }
+    recordBestiary(t.id);
     Audio.sfx('death');
     t.sprite.setTint(0xb02040);
     await new Promise((r) =>

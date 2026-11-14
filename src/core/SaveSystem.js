@@ -45,6 +45,21 @@ export const SaveSystem = {
     else localStorage.setItem(LS(slot), JSON.stringify(data));
   },
 
+  async autoSave() {
+    if (!State.g) return;
+    try {
+      const data = { version: 1, savedAt: new Date().toISOString(), state: serialize(), isAuto: true };
+      if (desktop && desktop.writeSave) {
+        await desktop.writeSave(1, data).catch(() => {});
+      } else {
+        localStorage.setItem(LS(1), JSON.stringify(data));
+        localStorage.setItem('sinos_autosave', JSON.stringify(data));
+      }
+    } catch {
+      /* ignora */
+    }
+  },
+
   async load(slot) {
     const d = await readRaw(slot);
     if (!d || !d.state) return false;

@@ -2,7 +2,8 @@
 import { W, H, TILE, DIRS, DEBUG, COLORS } from '../config.js';
 import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
-import { State, flag, setFlag, addItem, hasItem, joinParty, healParty, gainExp, heroStats } from '../core/GameState.js';
+import { State, flag, setFlag, addItem, hasItem, joinParty, healParty, gainExp, heroStats, modifySanity, getSanity } from '../core/GameState.js';
+import { SaveSystem } from '../core/SaveSystem.js';
 import { MessageBox } from '../ui/MessageBox.js';
 import { Win } from '../ui/UI.js';
 import { textWidth } from '../core/Font.js';
@@ -59,6 +60,7 @@ export class MapScene extends Phaser.Scene {
     Audio.play(this.def.music);
     this.cameras.main.fadeIn(280, 0, 0, 0);
     if (this.def.banner && this.entry.from !== this.def.id) this.showBanner(this.def.name);
+    if (this.entry.from && this.entry.from !== this.def.id) SaveSystem.autoSave();
 
     const onWake = (_sys, data) => this.onWake(data);
     this.events.on('wake', onWake);
@@ -165,6 +167,7 @@ export class MapScene extends Phaser.Scene {
     }
     this.lights = (def.events ?? []).filter((e) => e.type === 'light');
     for (const e of def.events ?? []) if (e.type === 'save') this.lights.push({ x: e.x, y: e.y, r: 34 });
+    this.horrorVignette = this.add.rectangle(0, 0, W, H, 0x500010).setOrigin(0).setScrollFactor(0).setDepth(4100).setAlpha(0).setBlendMode(Phaser.BlendModes.MULTIPLY);
     if (def.dark) {
       this.darkRT = this.add.renderTexture(0, 0, W, H).setOrigin(0).setScrollFactor(0).setDepth(4000);
       this.lightImg = this.make.image({ x: 0, y: 0, key: 'light', add: false });
@@ -176,6 +179,15 @@ export class MapScene extends Phaser.Scene {
     if (this.fog) {
       this.fog.tilePositionX = (cam.scrollX * 0.7) / 3 + time * 0.004;
       this.fog.tilePositionY = (cam.scrollY * 0.7) / 3 + time * 0.0015;
+    }
+    if (this.horrorVignette) {
+      const san = getSanity();
+      if (san < 50) {
+        const pulse = 0.5 + 0.5 * Math.sin(time / 280);
+        this.horrorVignette.setAlpha((1 - san / 50) * 0.5 * pulse);
+      } else {
+        this.horrorVignette.setAlpha(0);
+      }
     }
     if (this.darkRT) {
       const rt = this.darkRT;
@@ -381,6 +393,7 @@ export class MapScene extends Phaser.Scene {
     if (!this.busy || this.msg.active) State.g.playTime += delta / 1000;
     this.msg.update(this.controls, delta);
     this.updateAtmosphere(time);
+    this.updateSanity(time, delta);
     if (this.transitioning) return;
     if (!this.busy && !this.msg.active) this.updateNpcs(time);
     if (this.msg.active || this.busy || this.player.moving) return;
@@ -395,6 +408,39 @@ export class MapScene extends Phaser.Scene {
     }
     const dir = c.dir();
     if (dir) this.tryStep(dir);
+  }
+
+  updateSanity(time, delta) {
+    if (!this.sanityTimer) this.sanityTimer = 0;
+    this.sanityTimer += delta;
+    if (this.sanityTimer >= 1000) {
+      this.sanityTimer = 0;
+      const p = this.player;
+      let nearLight = false;
+      for (const L of this.lights ?? []) {
+        const dist = Math.hypot(p.x - L.x, p.y - L.y);
+        if (dist <= 3) {
+          nearLight = true;
+          break;
+        }
+      }
+      if (nearLight) {
+        modifySanity(2);
+      } else if (this.def.dark) {
+        const hasLanterna = hasItem('lanterna');
+        modifySanity(hasLanterna ? -0.25 : -0.8);
+      }
+    }
+    const san = getSanity();
+    if (san < 30) {
+      if (!this.lastHeartbeat || time - this.lastHeartbeat > Math.max(1400, san * 80)) {
+        this.lastHeartbeat = time;
+        Audio.sfx('heartbeat');
+      }
+      if (san < 20 && Math.random() < 0.02) {
+        this.cameras.main.shake(120, 0.002);
+      }
+    }
   }
 
   updateNpcs(time) {

@@ -12,12 +12,15 @@ export const State = {
 export function newGame() {
   State.g = {
     party: [makeHero('aren', 1)],
-    inventory: { pocao: 3, antidoto: 1 },
+    inventory: { pocao: 3, antidoto: 1, erva_calmante: 1 },
     gold: 120,
     flags: {},
     map: { id: 'cabana', x: 3, y: 3, dir: 'down' },
     playTime: 0,
     chapter: 1,
+    sanity: 100,
+    maxSanity: 100,
+    bestiary: {},
   };
   return State.g;
 }
@@ -115,6 +118,24 @@ export function healParty() {
     h.mp = s.maxMp;
     h.status = [];
   }
+  State.g.sanity = State.g.maxSanity ?? 100;
+}
+
+export function modifySanity(amount) {
+  if (!State.g) return 100;
+  const max = State.g.maxSanity ?? 100;
+  State.g.sanity = Math.max(0, Math.min(max, (State.g.sanity ?? max) + amount));
+  return State.g.sanity;
+}
+
+export function getSanity() {
+  return State.g?.sanity ?? 100;
+}
+
+export function recordBestiary(enemyId) {
+  if (!State.g || !enemyId) return;
+  if (!State.g.bestiary) State.g.bestiary = {};
+  State.g.bestiary[enemyId] = (State.g.bestiary[enemyId] ?? 0) + 1;
 }
 
 // ----- inventário -----
@@ -164,6 +185,9 @@ export function serialize() {
 
 export function deserialize(data) {
   State.g = JSON.parse(JSON.stringify(data));
+  if (State.g.sanity === undefined) State.g.sanity = 100;
+  if (State.g.maxSanity === undefined) State.g.maxSanity = 100;
+  if (!State.g.bestiary) State.g.bestiary = {};
   for (const h of State.g.party) clampHero(h);
 }
 

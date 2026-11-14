@@ -312,11 +312,22 @@ class AudioEngine {
       case 'bell':
         T('sine', 392, 392, 2.2, 0.3); T('sine', 784, 784, 1.5, 0.12); T('sine', 1082, 1082, 0.9, 0.08); break;
       case 'save': [784, 988, 1175, 1568].forEach((f, i) => T('sine', f, f, 0.4, 0.12, i * 0.09)); break;
-      case 'heart': T('sine', 70, 40, 0.15, 0.4); T('sine', 70, 40, 0.15, 0.3, 0.22); break;
+      case 'heart':
+      case 'heartbeat': T('sine', 70, 40, 0.15, 0.4); T('sine', 70, 40, 0.15, 0.3, 0.22); break;
       case 'whisper': N(1.2, 0.12, 'bandpass', 1500, 2500); N(1.0, 0.08, 'bandpass', 900, 600, 0.3); break;
       case 'run': N(0.3, 0.25, 'highpass', 2000, 6000); break;
       case 'steal': T('pulse', 1500, 2500, 0.12, 0.12, 0, 0.125); break;
       case 'sleep': [880, 740, 622].forEach((f, i) => T('sine', f, f, 0.25, 0.12, i * 0.12)); break;
+      case 'stagger': N(0.25, 0.5, 'lowpass', 1400, 80); T('sawtooth', 280, 40, 0.25, 0.2); break;
+      case 'combo':
+        [784, 1046, 1318, 1568].forEach((f, i) => T('sine', f, f, 0.4, 0.15, i * 0.07));
+        T('pulse', 1200, 2400, 0.3, 0.1, 0.1, 0.125);
+        break;
+      case 'thunder':
+        N(0.8, 0.45, 'lowpass', 600, 40);
+        T('sawtooth', 80, 30, 0.6, 0.2, 0.05);
+        break;
+      case 'wind': N(1.5, 0.15, 'bandpass', 600, 1200); break;
       default: break;
     }
   }

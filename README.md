@@ -62,12 +62,18 @@ Roteiro: Vila → Ancião → Templo (Selene + lanterna) → Bosque de Verdemar 
 ## Sistemas
 
 - Exploração em grade com NPCs, baús, placas, sustos roteirizados, escuridão com lanterna e névoa.
-- Combate por turnos ordenado por agilidade: Atacar, Habilidade, Item, Defender, Fugir. Elementos
-  (Fogo, Luz, Trevas, Aurora), criaturas sombrias (cura causa dano), status (Veneno, Cegueira, Medo, Sono), roubo.
+- **Sistema de Sanidade & Terror**: Ficar na escuridão consome a sanidade do grupo, gerando vinheta pulsante, oscilação de luz e batimentos cardíacos tensos; restaurada em altares e com Ervas Calmantes.
+- **Combate Tático por Turnos**:
+  - **Linha do Tempo Visual (Timeline)** no topo da tela com a ordem estimada de turnos.
+  - **Habilidades Cooperativas (Dual Techs)**: Combos entre heróis (Aren + Selene, Aren + Kael, etc.).
+  - **Mecânica de Interrupção (Stagger)**: Ataques críticos ou fraquezas elementais quebram canalizações inimigas.
+  - Elementos (Fogo, Luz, Trevas, Aurora), criaturas sombrias (cura causa dano), status (Veneno, Cegueira, Medo, Sono), roubo.
+- **Bestiário de Monstros**: Registro dinâmico de criaturas derrotadas com estatísticas, fraquezas e drops.
+- **Qualidade de Vida**: Velocidade de combate configurável (Normal / Rápida) e salvamento automático suave ao trocar de mapa.
 - Níveis, EXP, habilidades aprendidas por nível, equipamentos (arma, armadura, acessório).
-- Menu: Itens, Habilidades, Equipar, Status, Ordem do grupo, Salvar, Configurações.
-- Loja (compra/venda), pousada, altares de velas (restauram o grupo e permitem salvar).
-- 3 slots de save (JSON em `%APPDATA%/sinos-da-aurora/saves`; no navegador, localStorage).
+- Menu: Itens, Habilidades, Equipar, Status, Ordem do grupo, Bestiário, Salvar, Configurações.
+- Loja (compra/venda), pousada, altares de velas (restauram o grupo, sanidade e permitem salvar).
+- 3 slots de save (JSON em `%APPDATA%/sinos-da-aurora/saves`; no navegador, localStorage) + auto-save.
 
 ## Estrutura
 

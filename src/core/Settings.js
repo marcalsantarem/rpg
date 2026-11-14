@@ -1,5 +1,5 @@
 const KEY = 'sinos_settings';
-const DEFAULTS = { music: 0.6, sfx: 0.7, textSpeed: 2 }; // textSpeed: 1 lento, 2 normal, 3 rápido, 4 instantâneo
+const DEFAULTS = { music: 0.6, sfx: 0.7, textSpeed: 2, battleSpeed: 1 }; // battleSpeed: 1 normal, 2 rápida
 
 function load() {
   try {
@@ -14,7 +14,7 @@ export const Settings = {
   ...load(),
   save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ music: this.music, sfx: this.sfx, textSpeed: this.textSpeed }));
+      localStorage.setItem(KEY, JSON.stringify({ music: this.music, sfx: this.sfx, textSpeed: this.textSpeed, battleSpeed: this.battleSpeed }));
     } catch {
       /* armazenamento indisponível */
     }

@@ -8,7 +8,8 @@ import { Win, MenuList, drawBar, uiCamera } from '../ui/UI.js';
 import { wrapText } from '../core/Font.js';
 import { HEROES, expForLevel } from '../data/heroes.js';
 import { ITEMS, canEquip, STAT_NAMES } from '../data/items.js';
-import { SKILLS } from '../data/skills.js';
+import { SKILLS, ELEMENT_NAMES } from '../data/skills.js';
+import { ENEMIES } from '../data/enemies.js';
 import { MAP_NAMES } from '../data/maps/index.js';
 
 export class MenuScene extends Phaser.Scene {
@@ -60,27 +61,31 @@ export class MenuScene extends Phaser.Scene {
     this.partyWin = partyWin;
     this.drawParty();
 
-    const cmdWin = new Win(this, 276, 0, 92, 122);
+    const cmdWin = new Win(this, 276, 0, 92, 126);
     objs.push(cmdWin);
-    const locWin = new Win(this, 276, 122, 92, 38);
+    const locWin = new Win(this, 276, 126, 92, 34);
     objs.push(locWin);
     const name = MAP_NAMES[State.g.map.id] ?? '';
-    wrapText(name, 78).slice(0, 2).forEach((l, i) => locWin.text(7, 6 + i * 12, l, COLORS.gray));
+    wrapText(name, 78).slice(0, 2).forEach((l, i) => locWin.text(7, 5 + i * 11, l, COLORS.gray));
     const infoWin = new Win(this, 276, 160, 92, 48);
     objs.push(infoWin);
-    infoWin.text(7, 5, 'Moedas', COLORS.gray);
-    this.goldText = infoWin.textRight(84, 5, `${State.g.gold}`);
-    infoWin.text(7, 24, 'Tempo', COLORS.gray);
-    this.timeText = infoWin.textRight(84, 24, formatTime(State.g.playTime));
+    infoWin.text(7, 4, 'Moedas', COLORS.gray);
+    this.goldText = infoWin.textRight(84, 4, `${State.g.gold}`);
+    const san = Math.round(State.g.sanity ?? 100);
+    infoWin.text(7, 17, 'Sanidade', COLORS.gray);
+    infoWin.textRight(84, 17, `${san}%`, san < 40 ? COLORS.red : COLORS.yellow);
+    infoWin.text(7, 30, 'Tempo', COLORS.gray);
+    this.timeText = infoWin.textRight(84, 30, formatTime(State.g.playTime));
 
     const list = new MenuList(this, cmdWin, {
-      x: 20, y: 6, width: 74, rowH: 13.5,
+      x: 20, y: 5, width: 74, rowH: 12.8,
       items: [
         { label: 'Itens', v: 'items' },
         { label: 'Habilid.', v: 'skills' },
         { label: 'Equipar', v: 'equip' },
         { label: 'Status', v: 'status' },
         { label: 'Ordem', v: 'order', enabled: State.g.party.length > 1 },
+        { label: 'Bestiário', v: 'bestiary' },
         { label: 'Salvar', v: 'save', enabled: !!this.opts.canSave },
         { label: 'Config.', v: 'config' },
         { label: 'Título', v: 'title' },
@@ -163,6 +168,7 @@ export class MenuScene extends Phaser.Scene {
     else if (v === 'status')
       this.pickHero((i) => (i === null ? back() : this.statusPage(i, back)));
     else if (v === 'order') this.orderPage(back);
+    else if (v === 'bestiary') this.bestiaryPage(back);
     else if (v === 'save') {
       this.events.once('resume', back);
       this.scene.launch('SaveLoad', { mode: 'save', parent: 'Menu' });
@@ -557,17 +563,19 @@ export class MenuScene extends Phaser.Scene {
 
   // ------------------------------------------------------------ configurações
   configPage(back) {
-    const win = new Win(this, Math.round(UW / 2 - 120), 50, 240, 110, { depth: 11000 });
+    const win = new Win(this, Math.round(UW / 2 - 120), 40, 240, 126, { depth: 11000 });
     win.text(14, 8, 'Configurações', COLORS.yellow);
     const speeds = ['', 'Lenta', 'Normal', 'Rápida', 'Instant.'];
+    const battleSpeeds = ['', 'Normal', 'Rápida'];
     const rows = [
       { label: 'Música', get: () => `${Math.round(Settings.music * 10)}`, adj: (d) => (Settings.music = Math.max(0, Math.min(1, Math.round((Settings.music + d * 0.1) * 10) / 10))) },
       { label: 'Efeitos', get: () => `${Math.round(Settings.sfx * 10)}`, adj: (d) => (Settings.sfx = Math.max(0, Math.min(1, Math.round((Settings.sfx + d * 0.1) * 10) / 10))) },
       { label: 'Texto', get: () => speeds[Settings.textSpeed], adj: (d) => (Settings.textSpeed = Math.max(1, Math.min(4, Settings.textSpeed + d))) },
+      { label: 'Combate', get: () => battleSpeeds[Settings.battleSpeed ?? 1], adj: (d) => (Settings.battleSpeed = Math.max(1, Math.min(2, (Settings.battleSpeed ?? 1) + d))) },
     ];
     const items = () => rows.map((r) => ({ label: r.label, right: `< ${r.get()} >` }));
     const list = new MenuList(this, win, {
-      x: 18, y: 30, width: 210, rowH: 16, items: items(),
+      x: 18, y: 28, width: 210, rowH: 15, items: items(),
       onSelect: () => {},
       onCancel: () => {
         Settings.save();
@@ -575,7 +583,7 @@ export class MenuScene extends Phaser.Scene {
         back();
       },
     });
-    win.text(14, 86, 'Setas: ajustar   X: voltar', COLORS.dim);
+    win.text(14, 102, 'Setas: ajustar   X: voltar', COLORS.dim);
     this.push({
       update: (c) => {
         const d = c.repeat('left') ? -1 : c.repeat('right') ? 1 : 0;
@@ -588,6 +596,85 @@ export class MenuScene extends Phaser.Scene {
         list.update(c);
       },
       destroy: () => {
+        list.destroy();
+        win.destroy();
+      },
+    });
+  }
+
+  // ------------------------------------------------------------ bestiário
+  bestiaryPage(back) {
+    const win = new Win(this, 0, 0, UW, UH, { depth: 11000 });
+    win.text(14, 8, 'Bestiário de Aldenor', COLORS.yellow);
+    const bestiary = State.g.bestiary ?? {};
+    const enemyList = Object.entries(ENEMIES).map(([id, d]) => {
+      const count = bestiary[id] ?? 0;
+      return {
+        id,
+        d,
+        count,
+        label: count > 0 ? d.name : '???',
+        right: count > 0 ? `x${count}` : '—',
+        enabled: count > 0,
+      };
+    });
+
+    let previewObjs = [];
+    const showEnemy = (item) => {
+      previewObjs.forEach((o) => o.destroy());
+      previewObjs = [];
+      if (!item || !item.enabled) {
+        previewObjs.push(win.text(160, 60, 'Criatura desconhecida.', COLORS.dim));
+        previewObjs.push(win.text(160, 74, 'Derrote este inimigo para', COLORS.dim));
+        previewObjs.push(win.text(160, 88, 'desvendar seus segredos.', COLORS.dim));
+        return;
+      }
+      const d = item.d;
+      const spr = this.add.image(280, 70, `mon_${d.sprite}`).setOrigin(0.5, 0.5).setScale(2);
+      if (d.sprite === 'shadow') spr.setAlpha(0.85);
+      win.add(spr);
+      previewObjs.push(spr);
+
+      previewObjs.push(win.text(150, 30, d.name, COLORS.yellow));
+      previewObjs.push(win.text(150, 44, `Derrotados: ${item.count}`, COLORS.gray));
+      previewObjs.push(win.text(150, 58, `HP Aprox: ${d.hp}`, COLORS.white));
+
+      const weaks = Object.keys(d.weak ?? {})
+        .filter((w) => (d.weak[w] ?? 1) > 1)
+        .map((w) => ELEMENT_NAMES[w] ?? w);
+      previewObjs.push(win.text(150, 76, 'Fraquezas:', COLORS.gray));
+      previewObjs.push(win.text(150, 88, weaks.length ? weaks.join(', ') : 'Nenhuma conhecida', weaks.length ? COLORS.green : COLORS.dim));
+
+      const drops = (d.drops ?? []).map(([it]) => ITEMS[it]?.name ?? it);
+      previewObjs.push(win.text(150, 106, 'Espólios:', COLORS.gray));
+      previewObjs.push(win.text(150, 118, drops.length ? drops.join(', ') : 'Nenhum', drops.length ? COLORS.blue : COLORS.dim));
+
+      if (d.shadow) {
+        previewObjs.push(win.text(150, 138, '* Sombra: magias de cura causam dano.', COLORS.purple));
+      }
+    };
+
+    const list = new MenuList(this, win, {
+      x: 14,
+      y: 28,
+      width: 124,
+      rowH: 15,
+      visibleRows: 10,
+      items: enemyList,
+      onChange: showEnemy,
+      onSelect: () => {},
+      onCancel: () => {
+        previewObjs.forEach((o) => o.destroy());
+        this.pop();
+        back();
+      },
+    });
+
+    showEnemy(enemyList[0]);
+    this.push({
+      update: (c) => list.update(c),
+      destroy: () => {
+        previewObjs.forEach((o) => o.destroy());
         list.destroy();
         win.destroy();
       },

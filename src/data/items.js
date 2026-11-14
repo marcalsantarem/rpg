@@ -5,7 +5,7 @@ export const ITEMS = {
   pocao_forte: { name: 'Poção Forte', type: 'item', price: 90, desc: 'Restaura 160 HP de um aliado.', use: { heal: 160 }, target: 'ally', battle: true, field: true },
   eter: { name: 'Éter', type: 'item', price: 70, desc: 'Restaura 20 MP de um aliado.', use: { mp: 20 }, target: 'ally', battle: true, field: true },
   antidoto: { name: 'Antídoto', type: 'item', price: 12, desc: 'Cura Veneno.', use: { cure: ['veneno'] }, target: 'ally', battle: true, field: true },
-  erva_calmante: { name: 'Erva Calmante', type: 'item', price: 18, desc: 'Cura Medo.', use: { cure: ['pavor'] }, target: 'ally', battle: true, field: true },
+  erva_calmante: { name: 'Erva Calmante', type: 'item', price: 18, desc: 'Cura Medo e restaura 40 de Sanidade.', use: { cure: ['pavor'], sanity: 40 }, target: 'ally', battle: true, field: true },
   colirio: { name: 'Colírio', type: 'item', price: 12, desc: 'Cura Cegueira.', use: { cure: ['cego'] }, target: 'ally', battle: true, field: true },
   erva_medicinal: { name: 'Erva Medicinal', type: 'item', price: 0, sell: 10, desc: 'Restaura 30 HP e cura Veneno.', use: { heal: 30, cure: ['veneno'] }, target: 'ally', battle: true, field: true },
   pluma_aurora: { name: 'Pluma da Aurora', type: 'item', price: 150, desc: 'Desperta um aliado desmaiado com 30% do HP.', use: { revive: 0.3 }, target: 'deadAlly', battle: true, field: true },
