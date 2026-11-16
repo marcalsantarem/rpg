@@ -290,6 +290,7 @@ export function buildBattleBackgrounds(scene) {
   make('bg_cave', (c, r) => bgCave(c, r, false));
   make('bg_web', (c, r) => bgCave(c, r, true));
   make('bg_grove', (c, r) => bgGrove(c, r));
+  make('bg_cemetery', (c, r) => bgForest(c, r, { sky0: '#080614', sky1: '#221a36', far: '#161426', mid: '#100c1c', ground: '#1c1828', mist: '#483868', moon: '#ede6fa' }));
 }
 
 export function buildMisc(scene) {

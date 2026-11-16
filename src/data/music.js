@@ -145,6 +145,25 @@ export const SONGS = {
     ],
   },
 
+  cemetery: {
+    bpm: 58,
+    tracks: [
+      { inst: 'pad', vol: 0.08, notes: 'D3:16 Bb2:16 C3:16 A2:16 D3:16 G2:16 A2:16 D2:16' },
+      { inst: 'bell', vol: 0.14, notes: 'r:4 D5:4 r:8 r:4 F5:4 r:8 r:4 E5:4 r:8 r:4 C#5:4 r:8 r:4 D5:4 r:8 r:4 Bb4:4 r:8 r:4 A4:8 r:4' },
+      { inst: 'tri', vol: 0.18, notes: 'D2:16 G1:16 C2:16 F1:16 Bb1:16 E1:16 A1:16 D1:16' },
+    ],
+  },
+
+  catacombs: {
+    bpm: 52,
+    tracks: [
+      { inst: 'tri', vol: 0.2, notes: 'D1:32 Eb1:32 D1:32 C#1:32' },
+      { inst: 'noise', vol: 0.18, notes: rep('k:2 r:6 s:1 r:7', 8) },
+      { inst: 'bell', vol: 0.1, notes: 'r:12 F5:2 r:18 r:8 Ab5:2 r:22 r:6 D5:2 r:24 r:10 C#5:4 r:18' },
+      { inst: 'sq12', vol: 0.03, notes: 'D3:16 Eb3:16 D3:16 C#3:16 D3:16 Eb3:16 D3:16 C#3:16' },
+    ],
+  },
+
   gameover: {
     bpm: 56,
     loop: false,

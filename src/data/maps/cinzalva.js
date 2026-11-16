@@ -24,7 +24,7 @@ export const cinzalva = {
     'F..RRRRR....===o===...RRRRR..F',
     'F..WwDwW....=======...WwDwW..F',
     'F....:.........:........:....F',
-    'F.l..::::::::::::::::::::..l.F',
+    'F.l..::::::::::::::::::::..l::',
     'F..............:.............F',
     'FT...,.,.....RRRRR....~~~....F',
     'F....,.,.....RRRRR....~~~~~..F',
@@ -42,6 +42,25 @@ export const cinzalva = {
     { type: 'warp', x: 15, y: 19, to: 'casa_anciao', tx: 5, ty: 5, dir: 'up', sfx: 'door' },
     { type: 'warp', x: 14, y: 0, to: 'bosque', tx: 15, ty: 26, dir: 'up' },
     { type: 'warp', x: 15, y: 0, to: 'bosque', tx: 16, ty: 26, dir: 'up' },
+    { type: 'warp', x: 29, y: 15, to: 'estrada', tx: 1, ty: 9, dir: 'right' },
+    {
+      type: 'touch', x: 28, y: 15, w: 1, h: 1,
+      cond: (f) => !f.boss2,
+      script: async (a) => {
+        await a.face('guarda_leste', 'left');
+        await a.say('Guarda Leste', 'A Estrada Real para Vel-Noar está temporariamente fechada por ordem do Ancião.');
+        await a.say('Guarda Leste', 'Não podemos deixar ninguém partir enquanto Lia estiver perdida no bosque!');
+        await a.movePlayer('L');
+      },
+    },
+    {
+      type: 'npc', id: 'guarda_leste', x: 28, y: 14, sprite: 'guard', dir: 'down',
+      script: async (a) => {
+        if (a.flag('boss2')) return a.say('Guarda Leste', 'A estrada para a Abadia de Vel-Noar está aberta. Que Liora guie seus passos contra as sombras!');
+        return a.say('Guarda Leste', 'Rumores dizem que a abadia ao leste também foi tomada por névoa sombria...');
+      },
+    },
+    { type: 'read', x: 26, y: 14, text: 'LESTE: Estrada Real para a Abadia de Vel-Noar.' },
     { type: 'light', x: 2, y: 15, r: 40 },
     { type: 'light', x: 27, y: 15, r: 40 },
     { type: 'read', x: 13, y: 2, text: 'NORTE: Bosque de Verdemar.\nAviso da guarda: lobos e luzes estranhas foram vistos na trilha. Viaje em grupo!' },

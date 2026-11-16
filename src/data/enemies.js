@@ -61,6 +61,20 @@ export const ENEMIES = {
     exp: 38, gold: 24, drops: [['pocao_forte', 0.12]], steal: 'pocao_forte', actions: [['attack', 3], ['mordida', 2], ['uivo', 1]], weak: { ...SHADOW_WEAK, fogo: 1.5 },
   },
 
+  // ----- Abadia de Vel-Noar -----
+  esqueleto: {
+    name: 'Guarda Esquelético', sprite: 'skeleton', hp: 160, mp: 0, atk: 54, def: 24, mag: 8, res: 14, agi: 11, luck: 4, shadow: true,
+    exp: 48, gold: 35, drops: [['pocao_forte', 0.2], ['espada_ferro', 0.05]], steal: 'pocao_forte', actions: [['attack', 3], ['corte_enferrujado', 2], ['golpe_escudo', 1]], weak: { ...SHADOW_WEAK, fogo: 1.4 },
+  },
+  gargula: {
+    name: 'Gárgula de Pedra', sprite: 'gargoyle', hp: 200, mp: 0, atk: 58, def: 32, mag: 14, res: 18, agi: 14, luck: 5,
+    exp: 55, gold: 40, drops: [['amuleto_prata', 0.05], ['pocao_forte', 0.25]], steal: 'eter', actions: [['attack', 3], ['garras_pedra', 2], ['sopro_petreo', 1]], weak: { fogo: 1.3, luz: 1.5, aurora: 1.4 },
+  },
+  espectro: {
+    name: 'Espectro da Abadia', sprite: 'specter', hp: 150, mp: 0, atk: 22, def: 42, mag: 40, res: 20, agi: 15, luck: 8, shadow: true,
+    exp: 58, gold: 42, drops: [['eter', 0.3], ['rosario_sagrado', 0.04]], steal: 'eter', actions: [['lamento', 2], ['pesadelo', 2], ['dreno_alma', 1]], weak: SHADOW_WEAK,
+  },
+
   // ----- Chefes -----
   tecela: {
     name: 'Rainha Aranha', sprite: 'weaver', boss: true, hp: 950, mp: 0, atk: 40, def: 16, mag: 24, res: 12, agi: 12, luck: 5,
@@ -83,6 +97,17 @@ export const ENEMIES = {
       }
       if (ctx.turn % 3 === 0) return hpr < 0.5 ? 'galho_grito' : 'galho_chicote';
       return ctx.pick([['galho_esmagar', 2], ['attack', 2], ['galho_esporos', 1], ['galho_chicote', 1]]);
+    },
+  },
+  abade_chefe: {
+    name: 'Abade Malphas', sprite: 'abbot', boss: true, hp: 3200, mp: 0, atk: 62, def: 28, mag: 48, res: 24, agi: 13, luck: 6, shadow: true,
+    exp: 1200, gold: 1500, drops: [['espada_prateada', 1]], steal: 'anel_aurora', stealRate: 0.3,
+    weak: { luz: 1.8, aurora: 2.2, fogo: 1.3, trevas: 0 },
+    ai(self, ctx) {
+      const hpr = self.hp / self.maxHp;
+      if (ctx.turn % 3 === 0) return 'liturgia_sombria';
+      if (hpr < 0.5 && Math.random() < 0.4) return 'chama_profana';
+      return ctx.pick([['condenacao', 2], ['dreno_alma', 2], ['attack', 2], ['pesadelo', 1]]);
     },
   },
 };

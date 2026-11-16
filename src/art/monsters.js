@@ -307,6 +307,112 @@ const PAINT = {
       px(c, x - 1, y - 1, '#c080e0');
     }
   },
+
+  skeleton(c, p) {
+    line(c, 12, 28, 11, 40, p.m);
+    line(c, 19, 28, 20, 40, p.m);
+    line(c, 10, 40, 13, 40, p.d);
+    line(c, 19, 40, 22, 40, p.d);
+    rect(c, 12, 26, 8, 3, p.m);
+    line(c, 15, 17, 15, 26, p.m);
+    line(c, 16, 17, 16, 26, p.d);
+    for (let y = 18; y <= 24; y += 2) {
+      line(c, 11, y, 20, y, p.m);
+      px(c, 11, y + 1, p.d);
+      px(c, 20, y + 1, p.d);
+    }
+    line(c, 8, 17, 23, 17, p.m);
+    line(c, 23, 17, 26, 25, p.m);
+    rect(c, 24, 25, 4, 2, '#4a3020');
+    line(c, 26, 10, 26, 36, p.s);
+    line(c, 27, 11, 27, 35, '#a0a4b0');
+    line(c, 8, 17, 5, 24, p.m);
+    poly(c, [[1, 20], [8, 19], [7, 30], [3, 33], [1, 29]], p.d);
+    poly(c, [[2, 21], [7, 20], [6, 29], [3, 31], [2, 28]], p.s);
+    disc(c, 15, 10, 5, p.m);
+    disc(c, 14, 9, 3, p.l);
+    rect(c, 13, 13, 5, 3, p.m);
+    px(c, 13, 10, p.e);
+    px(c, 17, 10, p.e);
+    for (let x = 13; x <= 17; x += 2) px(c, x, 14, OUT);
+  },
+
+  gargoyle(c, p) {
+    poly(c, [[14, 18], [2, 6], [8, 16], [3, 24], [12, 26]], p.d);
+    poly(c, [[26, 18], [38, 6], [32, 16], [37, 24], [28, 26]], p.d);
+    thick(c, 14, 18, 2, 6, 2, p.m);
+    thick(c, 26, 18, 38, 6, 2, p.m);
+    rect(c, 12, 28, 5, 10, p.d);
+    rect(c, 23, 28, 5, 10, p.d);
+    rect(c, 10, 37, 6, 3, p.m);
+    rect(c, 24, 37, 6, 3, p.m);
+    ellipse(c, 20, 24, 8, 8, p.m);
+    ellipse(c, 18, 22, 5, 5, p.l);
+    thick(c, 13, 20, 8, 28, 2, p.m);
+    thick(c, 27, 20, 32, 28, 2, p.m);
+    poly(c, [[6, 28], [9, 28], [7, 32]], p.l);
+    poly(c, [[31, 28], [34, 28], [33, 32]], p.l);
+    disc(c, 20, 13, 6, p.m);
+    disc(c, 18, 11, 3, p.l);
+    poly(c, [[15, 10], [12, 3], [17, 8]], p.d);
+    poly(c, [[25, 10], [28, 3], [23, 8]], p.d);
+    px(c, 17, 12, p.e);
+    px(c, 22, 12, p.e);
+    line(c, 17, 16, 23, 16, OUT);
+    px(c, 18, 17, '#ffffff');
+    px(c, 22, 17, '#ffffff');
+  },
+
+  specter(c, p) {
+    poly(c, [[10, 20], [24, 20], [28, 34], [20, 42], [14, 38], [8, 32]], p.d);
+    poly(c, [[12, 22], [22, 22], [25, 32], [18, 38], [12, 32]], p.m);
+    for (let x = 8; x < 26; x += 4) {
+      poly(c, [[x, 32], [x + 2, 40], [x + 4, 32]], p.m);
+    }
+    rect(c, 10, 14, 14, 12, p.m);
+    rect(c, 8, 18, 4, 10, p.l);
+    thick(c, 8, 18, 2, 24, 1, p.l);
+    thick(c, 24, 18, 30, 24, 1, p.l);
+    disc(c, 17, 11, 7, p.m);
+    disc(c, 15, 9, 4, p.l);
+    ellipse(c, 17, 12, 4, 5, OUT);
+    px(c, 15, 11, p.e);
+    px(c, 19, 11, p.e);
+    px(c, 15, 10, '#ffffff');
+    px(c, 19, 10, '#ffffff');
+  },
+
+  abbot(c, p) {
+    poly(c, [[20, 18], [44, 18], [52, 58], [12, 58]], p.d);
+    poly(c, [[24, 20], [40, 20], [46, 56], [18, 56]], p.m);
+    line(c, 27, 20, 25, 56, p.g);
+    line(c, 37, 20, 39, 56, p.g);
+    for (let y = 24; y < 54; y += 8) {
+      line(c, 24, y, 28, y, p.g);
+      line(c, 36, y, 40, y, p.g);
+    }
+    line(c, 32, 26, 32, 38, p.g);
+    line(c, 28, 34, 36, 34, p.g);
+    poly(c, [[16, 22], [22, 22], [14, 38], [8, 34]], p.m);
+    poly(c, [[42, 22], [48, 22], [54, 34], [48, 38]], p.m);
+    thick(c, 10, 34, 8, 40, 1, '#d8d4c2');
+    thick(c, 52, 34, 55, 38, 2, '#d8d4c2');
+    line(c, 55, 12, 55, 60, '#3a2a1a');
+    line(c, 56, 12, 56, 60, '#1a1008');
+    disc(c, 55, 10, 5, '#1a1008');
+    poly(c, [[52, 7], [55, 3], [58, 7]], p.g);
+    px(c, 53, 9, p.e);
+    px(c, 57, 9, p.e);
+    poly(c, [[25, 16], [39, 16], [36, 3], [28, 3]], p.m);
+    poly(c, [[27, 14], [37, 14], [34, 5], [30, 5]], p.l);
+    line(c, 32, 3, 32, 16, p.g);
+    disc(c, 32, 16, 5, '#d0c8b0');
+    ellipse(c, 32, 17, 4, 3, OUT);
+    px(c, 30, 16, p.e);
+    px(c, 34, 16, p.e);
+    px(c, 30, 15, '#ffffff');
+    px(c, 34, 15, '#ffffff');
+  },
 };
 
 export const MONSTER_ART = {
@@ -325,6 +431,10 @@ export const MONSTER_ART = {
   eye: { w: 34, h: 36, paint: 'eye', pal: { m: '#d8c8e0', l: '#f0e8f4', d: '#4a3060', a: '#8a40d0' } },
   weaver: { w: 88, h: 64, paint: 'weaver', pal: { m: '#4a3a5a', l: '#6a5a7a', d: '#2a2034', s: '#e0d0e0' } },
   tree: { w: 90, h: 92, paint: 'tree', pal: { m: '#3e2e26', d: '#24180e', a: '#3a2a5a', e: '#c060ff' } },
+  skeleton: { w: 34, h: 44, paint: 'skeleton', pal: { m: '#d8d4c2', l: '#f4f0e0', d: '#9a9482', s: '#707480', e: '#d02030' } },
+  gargoyle: { w: 42, h: 44, paint: 'gargoyle', pal: { m: '#505660', l: '#727884', d: '#323640', e: '#f03020' } },
+  specter: { w: 34, h: 44, paint: 'specter', pal: { m: '#2a1a3e', l: '#483464', d: '#160c22', e: '#70e0f0' }, alpha: 0.85 },
+  abbot: { w: 64, h: 64, paint: 'abbot', pal: { m: '#22162a', l: '#3e2e4c', d: '#100a16', g: '#c8a030', e: '#d040ff' } },
 };
 
 export function buildMonsters(scene) {

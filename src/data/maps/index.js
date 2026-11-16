@@ -2,7 +2,8 @@ import { cinzalva, cabana, pousada, loja, capela, casa_anciao } from './cinzalva
 import { bosque } from './bosque.js';
 import { caverna1, caverna2 } from './caverna.js';
 import { mata1, mata2 } from './mata.js';
+import { estrada, cemiterio, abadia, cripta } from './abadia.js';
 
-export const MAPS = { cinzalva, cabana, pousada, loja, capela, casa_anciao, bosque, caverna1, caverna2, mata1, mata2 };
+export const MAPS = { cinzalva, cabana, pousada, loja, capela, casa_anciao, bosque, caverna1, caverna2, mata1, mata2, estrada, cemiterio, abadia, cripta };
 
 export const MAP_NAMES = Object.fromEntries(Object.values(MAPS).map((m) => [m.id, m.name]));

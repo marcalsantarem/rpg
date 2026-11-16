@@ -44,8 +44,9 @@ Atalhos de depuração (`npm run debug` ou `?debug=1` no navegador): F1 cura o g
 F2 liga/desliga encontros, F3 dá 1000 de EXP, F4 teleporta para qualquer mapa, F5 força uma batalha.
 No navegador também dá para começar direto num mapa: `?debug=1&map=bosque&party=selene,kael&flags=boss1`.
 
-## História (Capítulo I — O Sino Silencioso)
+## História
 
+### Capítulo I — O Sino Silencioso
 Há trezentos anos, a Rainha Liora selou **Morvath, o Rei das Sombras**, com quatro **Sinos de Cristal**
 que tocam a cada alvorada. Agora o sino do templo de **Aldenor** silenciou, criaturas sombrias rondam os
 bosques e a pequena Lia desapareceu seguindo luzes no bosque. **Aren**, escudeiro da guarda com uma misteriosa
@@ -57,7 +58,13 @@ Marca do Sol na mão, parte para encontrá-la.
 - **Lumi**: fada da aurora que guia o grupo.
 
 Roteiro: Vila → Ancião → Templo (Selene + lanterna) → Bosque de Verdemar → Gruta de Cristal
-(Kael, chefe **Medusa**) → Floresta Ancestral (Mirela, chefe **Raizmor Corrompido**) → fim do capítulo.
+(Kael, chefe **Rainha Aranha**) → Floresta Ancestral (Mirela, chefe **Raizmor Corrompido**) → resgate de Lia.
+
+### Capítulo II — A Abadia de Vel-Noar
+Com dois fragmentos recuperados e Lia a salvo, a guarda de Aldenor abre o portão leste para a **Estrada Real**.
+O grupo parte para investigar a lendária **Abadia de Vel-Noar**, onde o terceiro sino silenciou e os mortos despertam de suas tumbas.
+
+Roteiro: Saída Leste de Aldenor → Estrada de Vel-Noar → Pátio da Abadia & Cemitério → Claustro dos Monges (enigma da Chave da Cripta) → Catacumbas dos Três Reis (chefe **Abade Malphas**) → resgate do **Cristal da Aurora III**.
 
 ## Sistemas
 
