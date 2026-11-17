@@ -7,6 +7,24 @@ export const VK = {
 
 const isTouch = () => window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 
+export function requestLandscape() {
+  const el = document.documentElement;
+  if (!document.fullscreenElement) {
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen().catch(() => {});
+    else if (el.msRequestFullscreen) el.msRequestFullscreen().catch(() => {});
+  }
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(() => {});
+  } else if (screen.lockOrientation) {
+    screen.lockOrientation('landscape');
+  } else if (screen.webkitLockOrientation) {
+    screen.webkitLockOrientation('landscape');
+  } else if (screen.mozLockOrientation) {
+    screen.mozLockOrientation('landscape');
+  }
+}
+
 function setDir(dir, run) {
   for (const d of ['up', 'down', 'left', 'right']) {
     const on = d === dir;
@@ -19,8 +37,14 @@ function setDir(dir, run) {
 function bindDpad(el) {
   const update = (t) => {
     const r = el.getBoundingClientRect();
-    const dx = t.clientX - (r.left + r.width / 2);
-    const dy = t.clientY - (r.top + r.height / 2);
+    let dx = t.clientX - (r.left + r.width / 2);
+    let dy = t.clientY - (r.top + r.height / 2);
+    if (document.body.classList.contains('force-rotate')) {
+      const physDx = dx;
+      const physDy = dy;
+      dx = physDy;
+      dy = -physDx;
+    }
     const dist = Math.hypot(dx, dy);
     if (dist < r.width * 0.12) return setDir(null);
     const dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
@@ -69,13 +93,52 @@ export function setupTouchPad() {
   bindDpad(pad.querySelector('#dpad'));
   bindButton(pad.querySelector('#btn-a'), 'ok');
   bindButton(pad.querySelector('#btn-b'), 'cancel');
-  // primeiro toque: tela cheia e tentativa de travar em paisagem
-  const goFull = () => {
-    const el = document.documentElement;
-    if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => {});
-    if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+
+  const btnFull = pad.querySelector('#btn-full');
+  if (btnFull) btnFull.addEventListener('click', requestLandscape);
+
+  const btnLock = document.getElementById('btn-lock-landscape');
+  if (btnLock) {
+    btnLock.addEventListener('click', () => {
+      requestLandscape();
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+        if (window.game && window.game.scale) window.game.scale.refresh();
+      }, 200);
+    });
+  }
+
+  const btnForce = document.getElementById('btn-force-rotate');
+  if (btnForce) {
+    btnForce.addEventListener('click', () => {
+      document.body.classList.toggle('force-rotate');
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+        if (window.game && window.game.scale) window.game.scale.refresh();
+      }, 150);
+    });
+  }
+
+  // Tenta engajar paisagem na primeira interação de toque do usuário
+  const onFirstTouch = () => {
+    requestLandscape();
+    window.removeEventListener('touchstart', onFirstTouch);
   };
-  pad.querySelector('#btn-full').addEventListener('click', goFull);
-  // evita zoom/rolagem acidental
+  window.addEventListener('touchstart', onFirstTouch, { passive: true });
+
+  // Redimensionamento quando o jogador vira o aparelho físico
+  const onResize = () => {
+    if (window.innerWidth > window.innerHeight) {
+      document.body.classList.remove('force-rotate');
+    }
+    setTimeout(() => {
+      if (window.game && window.game.scale) window.game.scale.refresh();
+    }, 150);
+  };
+  window.addEventListener('resize', onResize);
+  window.addEventListener('orientationchange', onResize);
+
+  // Evita zoom/rolagem acidental
   document.addEventListener('gesturestart', (e) => e.preventDefault());
 }
+
