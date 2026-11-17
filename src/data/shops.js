@@ -7,6 +7,6 @@ export const SHOPS = {
   bruno: {
     name: 'Forja do Bruno',
     greeting: 'Aço de Aldenor! Não há lâmina melhor deste lado das montanhas.',
-    stock: ['espada_ferro', 'espada_longa', 'maca_sagrada', 'cajado_abacial', 'arco_curto', 'arco_teixo', 'grimorio', 'tomo_sombras', 'gibao_couro', 'manto_peregrino', 'cota_malha', 'cota_reforcada', 'capa_floresta', 'armadura_placas', 'amuleto_prata', 'talisma_coragem'],
+    stock: ['espada_ferro', 'espada_longa', 'manopla_ferro', 'maca_sagrada', 'cajado_solar', 'cajado_abacial', 'arco_curto', 'arco_teixo', 'grimorio', 'tomo_sombras', 'gibao_couro', 'manto_peregrino', 'cota_malha', 'cota_reforcada', 'capa_floresta', 'armadura_placas', 'amuleto_prata', 'talisma_coragem'],
   },
 };

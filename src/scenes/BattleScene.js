@@ -835,8 +835,8 @@ export class BattleScene extends Phaser.Scene {
         break;
       case 'buff':
         if (s.cure) s.cure.forEach((st) => t.status.delete(st));
-        t.buffs = { ...s.buff, turns: s.turns ?? 3 };
-        this.popup(t, 'Protegido', COLORS.blue);
+        t.buffs = { ...(t.buffs ?? {}), ...s.buff, turns: s.turns ?? 3 };
+        this.popup(t, s.buff?.atk || s.buff?.mag ? 'Fortalecido' : 'Protegido', COLORS.blue);
         await wait(this, 200);
         break;
       case 'status':

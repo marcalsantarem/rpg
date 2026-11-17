@@ -58,7 +58,8 @@ export class MessageBox {
     if (this.face) this.face.destroy();
     this.face = null;
     const id = FACE_NAMES[name];
-    const key = id && `face_${id}`;
+    const sprite = id && HEROES[id] ? HEROES[id].sprite : id;
+    const key = sprite && `face_${sprite}`;
     if (key && this.scene.textures.exists(key)) {
       this.face = this.scene.add.image(7, 7, key).setOrigin(0).setScale(3);
       this.win.add(this.face);

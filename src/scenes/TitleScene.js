@@ -4,7 +4,6 @@ import { Controls } from '../core/Controls.js';
 import { Audio } from '../core/Audio.js';
 import { Settings } from '../core/Settings.js';
 import { SaveSystem } from '../core/SaveSystem.js';
-import { newGame } from '../core/GameState.js';
 import { Win, MenuList, makeText, uiCamera } from '../ui/UI.js';
 import { textWidth } from '../core/Font.js';
 import { makeCanvas, rng, px, rect, disc, poly, thick, mix, addTexture } from '../core/Pixel.js';
@@ -162,11 +161,9 @@ export class TitleScene extends Phaser.Scene {
   select(v) {
     if (v === 'new') {
       this.leaving = true;
-      Audio.stop(1);
-      this.cameras.main.fadeOut(900, 0, 0, 0);
-      this.time.delayedCall(950, () => {
-        newGame();
-        this.scene.start('Intro');
+      this.cameras.main.fadeOut(350, 0, 0, 0);
+      this.time.delayedCall(380, () => {
+        this.scene.start('ClassSelect');
       });
     } else if (v === 'load') {
       this.events.once('resume', () => this.menu.setActive(true));

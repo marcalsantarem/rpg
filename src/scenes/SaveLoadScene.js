@@ -39,7 +39,7 @@ export class SaveLoadScene extends Phaser.Scene {
         if (this.textures.exists(`face_${id}`)) win.add(this.add.image(104 + k * 46, y + 3, `face_${id}`).setOrigin(0).setScale(8 / 3));
       });
       win.text(20, y + 18, `${s.leader}`, COLORS.white);
-      win.text(20, y + 30, `Nv ${s.level}`, COLORS.white);
+      win.text(20, y + 30, `Nv ${s.level}${s.job ? ` · ${s.job}` : ''}`, COLORS.white);
       win.textRight(UW - 12, y + 2, formatTime(s.time), COLORS.white);
       win.textRight(UW - 12, y + 30, s.place, COLORS.gray);
     });
@@ -88,7 +88,7 @@ export class SaveLoadScene extends Phaser.Scene {
       return;
     }
     Audio.sfx('save');
-    for (const k of ['Menu', 'Map', 'Title', 'GameOver', 'EndChapter']) if (k !== this.opts.parent) this.scene.stop(k);
+    for (const k of ['Menu', 'Map', 'Title', 'ClassSelect', 'GameOver', 'EndChapter']) if (k !== this.opts.parent) this.scene.stop(k);
     if (this.opts.parent) this.scene.stop(this.opts.parent);
     this.cameras.main.fadeOut(400, 0, 0, 0);
     this.time.delayedCall(420, () => {

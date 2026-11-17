@@ -12,6 +12,7 @@ import { LEGEND } from '../data/maps/legend.js';
 import { TILE_INDEX, VARIANTS, AUTOS, OBJ_VARIANTS, SCATTER, AUTO_FILL_VARIANTS, hash2 } from '../art/tiles.js';
 import { UW } from '../config.js';
 import { ITEMS } from '../data/items.js';
+import { HEROES } from '../data/heroes.js';
 
 const OPP = { up: 'down', down: 'up', left: 'right', right: 'left' };
 const PATH_DIR = { U: 'up', D: 'down', L: 'left', R: 'right' };
@@ -50,7 +51,8 @@ export class MapScene extends Phaser.Scene {
     this.api = this.makeApi();
 
     this.buildMap();
-    this.player = this.makeActor(State.g.party[0].id, g.map.x, g.map.y, g.map.dir);
+    const leadSprite = HEROES[State.g.party[0].id]?.sprite ?? State.g.party[0].id;
+    this.player = this.makeActor(leadSprite, g.map.x, g.map.y, g.map.dir);
     this.player.isPlayer = true;
     this.createEvents();
     this.setupCamera();
@@ -645,7 +647,8 @@ export class MapScene extends Phaser.Scene {
     cam.fadeIn(250, 0, 0, 0);
     Audio.play(this.def.music, { restart: true });
     // líder pode ter mudado (ex.: troca no menu)
-    this.player.sprite.setTexture(`chr_${State.g.party[0].id}`);
+    const leadSprite = HEROES[State.g.party[0].id]?.sprite ?? State.g.party[0].id;
+    this.player.sprite.setTexture(`chr_${leadSprite}`);
     this.setFrame(this.player, 0);
     const r = this.battleResolve;
     this.battleResolve = null;
