@@ -42,8 +42,8 @@ export class BootScene extends Phaser.Scene {
     const params = new URLSearchParams(location.search);
     if (params.has('art')) this.scene.start('ArtTest');
     else if (params.has('map') && MAPS[params.get('map')]) {
-      // atalho de teste: ?map=id&x=&y=&party=selene,kael&flags=a,b
-      newGame();
+      // atalho de teste: ?map=id&x=&y=&party=selene,kael&flags=a,b&class=guerreiro
+      newGame(params.get('class') || 'guerreiro');
       for (const id of (params.get('party') || '').split(',').filter(Boolean)) joinParty(id);
       for (const f of (params.get('flags') || '').split(',').filter(Boolean)) State.g.flags[f] = true;
       const m = MAPS[params.get('map')];

@@ -8,10 +8,11 @@ import { MenuScene } from './scenes/MenuScene.js';
 import { ShopScene } from './scenes/ShopScene.js';
 import { SaveLoadScene } from './scenes/SaveLoadScene.js';
 import { TitleScene } from './scenes/TitleScene.js';
+import { ClassSelectScene } from './scenes/ClassSelectScene.js';
 import { IntroScene, GameOverScene, EndChapterScene } from './scenes/StoryScenes.js';
 import { setupTouchPad } from './core/TouchPad.js';
 
-const scenes = [BootScene, TitleScene, IntroScene, MapScene, HudScene, BattleScene, MenuScene, ShopScene, SaveLoadScene, GameOverScene, EndChapterScene, ArtTestScene];
+const scenes = [BootScene, TitleScene, ClassSelectScene, IntroScene, MapScene, HudScene, BattleScene, MenuScene, ShopScene, SaveLoadScene, GameOverScene, EndChapterScene, ArtTestScene];
 
 setupTouchPad();
 

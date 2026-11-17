@@ -80,7 +80,16 @@ export class ShopScene extends Phaser.Scene {
         if (!ok) return;
         const cur = heroStats(h);
         const nxt = heroStats(h, { ...h.equip, [it.type]: id });
-        const key = it.type === 'weapon' ? 'atk' : it.type === 'armor' ? 'def' : Object.keys(it.stats ?? { res: 0 })[0] === 'hp' ? 'maxHp' : Object.keys(it.stats ?? { res: 0 })[0];
+        const key =
+          it.type === 'weapon'
+            ? (it.stats?.mag ?? 0) > (it.stats?.atk ?? 0)
+              ? 'mag'
+              : 'atk'
+            : it.type === 'armor'
+              ? 'def'
+              : Object.keys(it.stats ?? { res: 0 })[0] === 'hp'
+                ? 'maxHp'
+                : Object.keys(it.stats ?? { res: 0 })[0];
         const d = (nxt[key] ?? 0) - (cur[key] ?? 0);
         const label = { atk: 'For', def: 'Def', res: 'Res', agi: 'Agi', luck: 'Sor', maxHp: 'HP', mag: 'Mag' }[key] ?? key;
         add(54, y, `${label} ${d > 0 ? '+' : ''}${d}`, d > 0 ? COLORS.green : d < 0 ? COLORS.red : COLORS.gray);

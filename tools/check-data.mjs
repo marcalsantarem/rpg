@@ -3,7 +3,7 @@ import { MAPS } from '../src/data/maps/index.js';
 import { LEGEND } from '../src/data/maps/legend.js';
 import { ITEMS } from '../src/data/items.js';
 import { SKILLS } from '../src/data/skills.js';
-import { HEROES } from '../src/data/heroes.js';
+import { HEROES, HERO_CLASSES } from '../src/data/heroes.js';
 import { ENEMIES } from '../src/data/enemies.js';
 import { SHOPS } from '../src/data/shops.js';
 import { SONGS } from '../src/data/music.js';
@@ -82,6 +82,11 @@ for (const [id, h] of Object.entries(HEROES)) {
   for (const [, s] of h.skills) if (!SKILLS[s]) err(`herói ${id}: habilidade "${s}" não existe`);
   for (const it of Object.values(h.equip)) if (it && !ITEMS[it]) err(`herói ${id}: equipamento "${it}" não existe`);
   if (!SPRITES.has(h.sprite)) err(`herói ${id}: sprite "${h.sprite}" não existe`);
+}
+for (const [id, c] of Object.entries(HERO_CLASSES)) {
+  for (const [, s] of c.skills) if (!SKILLS[s]) err(`classe ${id}: habilidade "${s}" não existe`);
+  for (const it of Object.values(c.equip)) if (it && !ITEMS[it]) err(`classe ${id}: equipamento "${it}" não existe`);
+  if (!SPRITES.has(c.sprite)) err(`classe ${id}: sprite "${c.sprite}" não existe`);
 }
 for (const [id, e] of Object.entries(ENEMIES)) {
   if (!MONSTER_ART[e.sprite]) err(`inimigo ${id}: sprite "${e.sprite}" não existe`);

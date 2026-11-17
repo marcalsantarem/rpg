@@ -1,5 +1,5 @@
 // Estado global do jogo (grupo, inventário, flags, posição) + regras de personagem.
-import { HEROES, expForLevel, MAX_LEVEL } from '../data/heroes.js';
+import { HEROES, HERO_CLASSES, applyHeroClass, expForLevel, MAX_LEVEL } from '../data/heroes.js';
 import { ITEMS, canEquip } from '../data/items.js';
 
 export const STAT_KEYS = ['hp', 'mp', 'atk', 'def', 'mag', 'res', 'agi', 'luck'];
@@ -9,9 +9,20 @@ export const State = {
   debugNoEncounters: false,
 };
 
-export function newGame() {
+export function heroDef(h) {
+  if (!h) return null;
+  if (typeof h === 'string') return HEROES[h];
+  if (h.id === 'aren' && h.classId && HERO_CLASSES[h.classId]) {
+    return { ...HEROES.aren, ...HERO_CLASSES[h.classId] };
+  }
+  return HEROES[h.id];
+}
+
+export function newGame(classId = 'guerreiro') {
+  const cls = applyHeroClass(classId);
   State.g = {
-    party: [makeHero('aren', 1)],
+    protagonistClass: cls.id,
+    party: [makeHero('aren', 1, cls.id)],
     inventory: { pocao: 3, antidoto: 1, erva_calmante: 1 },
     gold: 120,
     flags: {},
@@ -25,10 +36,12 @@ export function newGame() {
   return State.g;
 }
 
-export function makeHero(id, level = 1) {
+export function makeHero(id, level = 1, classId = null) {
+  if (id === 'aren' && classId) applyHeroClass(classId);
   const def = HEROES[id];
   const h = {
     id,
+    ...(id === 'aren' ? { classId: classId ?? def.classId ?? 'guerreiro' } : {}),
     level,
     exp: expForLevel(level),
     hp: 1,
@@ -43,7 +56,7 @@ export function makeHero(id, level = 1) {
 }
 
 export function heroBaseStats(h) {
-  const def = HEROES[h.id];
+  const def = heroDef(h);
   const out = {};
   for (const k of STAT_KEYS) out[k] = Math.floor(def.base[k] + def.growth[k] * (h.level - 1));
   return out;
@@ -72,7 +85,7 @@ export function heroProtects(h) {
 }
 
 export function heroSkills(h) {
-  return HEROES[h.id].skills.filter(([lv]) => lv <= h.level).map(([, id]) => id);
+  return heroDef(h).skills.filter(([lv]) => lv <= h.level).map(([, id]) => id);
 }
 
 export function clampHero(h) {
@@ -185,6 +198,11 @@ export function serialize() {
 
 export function deserialize(data) {
   State.g = JSON.parse(JSON.stringify(data));
+  const aren = State.g.party.find((h) => h.id === 'aren');
+  const classId = aren?.classId || State.g.protagonistClass || 'guerreiro';
+  applyHeroClass(classId);
+  State.g.protagonistClass = classId;
+  if (aren && !aren.classId) aren.classId = classId;
   if (State.g.sanity === undefined) State.g.sanity = 100;
   if (State.g.maxSanity === undefined) State.g.maxSanity = 100;
   if (!State.g.bestiary) State.g.bestiary = {};

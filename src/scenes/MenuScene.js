@@ -373,7 +373,8 @@ export class MenuScene extends Phaser.Scene {
     const listWin = new Win(this, 150, 74, 218, 134, { depth: 11000 });
     const bottom = new Win(this, 0, 24, 150, 40, { depth: 11000 });
     objs.push(top, statWin, slotWin, listWin, bottom);
-    if (this.textures.exists(`face_${h.id}`)) bottom.add(this.add.image(6, 4, `face_${h.id}`).setOrigin(0).setScale(2));
+    const faceKey = `face_${HEROES[h.id].sprite}`;
+    if (this.textures.exists(faceKey)) bottom.add(this.add.image(6, 4, faceKey).setOrigin(0).setScale(2));
     bottom.text(44, 6, HEROES[h.id].name, COLORS.yellow);
     bottom.text(44, 18, `Nv ${h.level} ${HEROES[h.id].job}`, COLORS.gray);
     statWin.text(8, 126, 'Esq.: remover', COLORS.dim);
@@ -477,7 +478,8 @@ export class MenuScene extends Phaser.Scene {
       const s = heroStats(h);
       const base = heroBaseStats(h);
       win = new Win(this, 0, 0, UW, UH, { depth: 11000 });
-      if (this.textures.exists(`face_${h.id}`)) win.add(this.add.image(8, 8, `face_${h.id}`).setOrigin(0).setScale(3));
+      const faceKey = `face_${def.sprite}`;
+      if (this.textures.exists(faceKey)) win.add(this.add.image(8, 8, faceKey).setOrigin(0).setScale(3));
       {
         const sv = this.add.sprite(334, 96, `chr_${HEROES[h.id].sprite}`, 0).setOrigin(0.5, 1).setScale(3);
         win.add(sv);
@@ -556,7 +558,8 @@ export class MenuScene extends Phaser.Scene {
   refreshLeader() {
     const map = this.scene.get('Map');
     if (map && map.player) {
-      map.player.sprite.setTexture(`chr_${State.g.party[0].id}`);
+      const leadSprite = HEROES[State.g.party[0].id]?.sprite ?? State.g.party[0].id;
+      map.player.sprite.setTexture(`chr_${leadSprite}`);
       map.setFrame(map.player, 0);
     }
   }

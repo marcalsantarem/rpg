@@ -330,8 +330,11 @@ const TAN = { s: '#d8a478' };
 const PALE = { s: '#f4dccc' };
 
 export const CHARACTERS = {
-  // heróis
+  // heróis (e variantes de classe de Aren)
   aren: { body: 'tunic', hair: 'short', gear: ['cape'], pal: { ...SKIN, h: '#7a4a28', c: '#3a5aa8', d: '#e0d8c4', a: '#6a4428', p: '#4a3e34', b: '#4a3020', r: '#b83434' } },
+  aren_espadachim: { body: 'tunic', hair: 'short', gear: ['cape'], pal: { ...SKIN, h: '#7a4a28', c: '#283868', d: '#f0d878', a: '#8a5428', p: '#2e2a38', b: '#3a2418', r: '#3a68b8' } },
+  aren_monge: { body: 'tunic', hair: 'short', veilBand: true, pal: { ...SKIN, h: '#7a4a28', c: '#d87828', d: '#f4dca8', a: '#b83428', p: '#5a4430', b: '#3a2818' } },
+  aren_mago: { body: 'robe', hair: 'short', gear: ['cape', 'pendant'], pal: { ...SKIN, h: '#7a4a28', c: '#304888', d: '#e8c050', a: '#a83848', r: '#583890' } },
   selene: { body: 'robe', hair: 'long', hairMat: 't', veilBand: true, gear: ['pendant'], pal: { ...PALE, t: '#f2f0fa', a: '#4a6ac0', c: '#ece8f4', d: '#5a7ad0' } },
   kael: { body: 'tunic', hair: 'long', hairMat: 'r', gear: ['quiver'], pal: { ...TAN, r: '#3e7040', c: '#8a5c38', d: '#5a7a4a', a: '#4a3020', p: '#4e4a3a', b: '#3a2a1a', u: '#7a5030', t: '#e8e0d0' } },
   mirela: { body: 'robe', hair: 'long', hat: true, pal: { ...PALE, h: '#dcd4ec', c: '#6040a0', d: '#3c2868', a: '#d04858', r: '#d04858' } },

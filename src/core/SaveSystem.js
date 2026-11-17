@@ -1,6 +1,6 @@
 // Salvamento em 3 slots: arquivos JSON via Electron, ou localStorage no navegador.
 import { State, serialize, deserialize } from './GameState.js';
-import { HEROES } from '../data/heroes.js';
+import { HEROES, HERO_CLASSES } from '../data/heroes.js';
 import { MAP_NAMES } from '../data/maps/index.js';
 
 const desktop = typeof window !== 'undefined' ? window.desktop : null;
@@ -26,11 +26,19 @@ export const SaveSystem = {
         continue;
       }
       const lead = d.state.party[0];
+      const leadCls = lead.id === 'aren' ? HERO_CLASSES[lead.classId || d.state.protagonistClass || 'guerreiro'] : null;
       out.push({
         slot: s,
         leader: HEROES[lead.id].name,
+        job: leadCls ? leadCls.job : HEROES[lead.id].job,
         level: lead.level,
-        party: d.state.party.map((h) => h.id),
+        party: d.state.party.map((h) => {
+          if (h.id === 'aren') {
+            const cls = HERO_CLASSES[h.classId || d.state.protagonistClass || 'guerreiro'];
+            return cls ? cls.sprite : 'aren';
+          }
+          return HEROES[h.id]?.sprite ?? h.id;
+        }),
         place: MAP_NAMES[d.state.map.id] ?? d.state.map.id,
         time: d.state.playTime,
         savedAt: d.savedAt,
